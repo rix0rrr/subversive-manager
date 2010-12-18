@@ -1,0 +1,46 @@
+
+package nl.rix0r.subversive.subversion;
+
+/**
+ * Collection of users
+ *
+ * Groups can be global or scoped to a repository. If they are scoped to the
+ * repository that is being edited, the group can be edited as well.
+ *
+ * @author rix0rrr
+ */
+public class Group implements Principal {
+    private String repository;
+    private String name;
+
+    public Group(String name) {
+        this.repository = "";
+        this.name       = name;
+    }
+
+    public Group(String repository, String name) {
+        this.repository = repository;
+        this.name       = name;
+    }
+
+    public String name() {
+        return name;
+    }
+
+    public String repository() {
+        return repository;
+    }
+
+    public boolean global() {
+        return repository.equals("");
+    }
+
+    public boolean appliesToRepository(String repository) {
+        return global() || repository().equals(repository);
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+}
