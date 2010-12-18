@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+  <!-- Inherit our applications main module.                      -->
+  <inherits name='nl.rix0r.Subversive'/>
+
+  <!-- Specify the path to any remote services.                   -->
+  <servlet path="/subversive/greet" class="nl.rix0r.server.GreetingServiceImpl" />
+
+</module>
