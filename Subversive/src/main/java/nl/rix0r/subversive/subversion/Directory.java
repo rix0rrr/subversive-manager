@@ -1,12 +1,14 @@
 
 package nl.rix0r.subversive.subversion;
 
+import java.io.Serializable;
+
 /**
  * A directory in a repository
  *
  * @author rix0rrr
  */
-public class Directory implements Comparable {
+public class Directory implements Comparable, Serializable {
     private String repository;
     private String path;
 

@@ -1,0 +1,63 @@
+
+package nl.rix0r.subversive.server;
+
+import java.io.Reader;
+import java.io.StringReader;
+import nl.rix0r.subversive.subversion.Access;
+import nl.rix0r.subversive.subversion.Directory;
+import nl.rix0r.subversive.subversion.Group;
+import nl.rix0r.subversive.subversion.Permission;
+import nl.rix0r.subversive.subversion.User;
+import org.apache.commons.lang.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
+/**
+ * @author rix0rrr
+ */
+public class ConfigParserTest {
+    private DiskConfiguration config = new DiskConfiguration(null);
+
+    @Test
+    public void testBlockMatcher() {
+        String[] cases = new String[] {
+            "[foo]", "[a:/b/c]"
+        };
+
+        for (String one: cases) {
+            Assert.assertTrue(
+                "Doesn't match: " + one,
+                DiskConfiguration.blockPattern.matcher(one).matches());
+        }
+    }
+
+    @Test
+    public void groupDefinition() throws Exception {
+        config.load(input("[groups]", "foo=bar"));
+
+        Assert.assertEquals(0, config.loadWarnings().size());
+        Assert.assertTrue(config.group(new Group("foo")).contains(new User("bar")));
+    }
+
+    @Test
+    public void permissionAssigmentGroup() throws Exception {
+        config.load(input("[groups]", "foo=bar", "[a:/]", "@foo=r"));
+
+        Assert.assertEquals(0, config.loadWarnings().size());
+        Assert.assertEquals(Access.Read,
+                ((Permission)config.permissions(new Directory("a", "/"), new Group("foo")).toArray()[0]).access());
+    }
+
+    @Test
+    public void permissionAssigmentUser() throws Exception {
+        config.load(input("[a:/]", "master_foo=r"));
+
+        Assert.assertEquals(0, config.loadWarnings().size());
+        Assert.assertEquals(Access.Read,
+                ((Permission)config.permissions(new Directory("a", "/"), new User("master_foo")).toArray()[0]).access());
+    }
+
+    private Reader input(String... lines) {
+        return new StringReader(StringUtils.join(lines, "\n"));
+    }
+}

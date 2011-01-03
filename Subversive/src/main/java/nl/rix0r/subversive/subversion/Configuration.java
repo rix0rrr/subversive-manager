@@ -1,8 +1,13 @@
 package nl.rix0r.subversive.subversion;
 
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * An in-memory representation of a Subversion configuration
@@ -12,11 +17,11 @@ import java.util.Map;
  *
  * @author rix0rrr
  */
-public class Configuration {
+public class Configuration implements Serializable {
     private Map<Group, GroupDefinition> definitions = new HashMap<Group, GroupDefinition>();
     private HashSet<Permission>         permissions = new HashSet<Permission>();
 
-    protected GroupDefinition group(Group group) {
+    public GroupDefinition group(Group group) {
         return definitions.get(group);
     }
 
@@ -31,6 +36,10 @@ public class Configuration {
     protected GroupDefinition addGroup(Group group) {
         if (!definitions.containsKey(group)) definitions.put(group, new GroupDefinition(group));
         return group(group);
+    }
+
+    protected void addUserToGroup(Group group, User user) {
+        addGroup(group).addUser(user);
     }
 
     protected void removeGroup(Group group) {
@@ -55,6 +64,10 @@ public class Configuration {
         definitions.put(groupDef.group(), groupDef);
     }
 
+    public Collection<GroupDefinition> groupDefinitions() {
+        return Collections.unmodifiableCollection(definitions.values());
+    }
+
     /**
      * Return a subset of Configuration restricted to the given repository
      *
@@ -70,6 +83,24 @@ public class Configuration {
         for (Permission perm: permissions)
             if (perm.appliesToRepository(repository))
                 ret.addPermission(new Permission(perm));
+
+        return ret;
+    }
+
+    /**
+     * Return a subset of all permissions
+     *
+     * Filter either by directory, or principal, or both (set values to
+     * null to not filter on that attribute).
+     */
+    public Set<Permission> permissions(Directory directory, Principal principal) {
+        Set<Permission> ret = new TreeSet<Permission>();
+
+        for (Permission p: permissions)
+            if ((directory == null || p.directory().equals(directory))
+                &&
+                (principal == null || p.principal().equals(principal)))
+                ret.add(p);
 
         return ret;
     }

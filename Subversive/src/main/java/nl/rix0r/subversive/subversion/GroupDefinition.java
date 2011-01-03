@@ -1,6 +1,7 @@
 
 package nl.rix0r.subversive.subversion;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -8,7 +9,7 @@ import java.util.Set;
 /**
  * Specification of the members of a group
  */
-public class GroupDefinition {
+public class GroupDefinition implements Serializable {
     private Group group;
     private Set<User> users = new HashSet<User>();
 
@@ -31,11 +32,15 @@ public class GroupDefinition {
     }
 
     protected void addUser(User user) {
-        this.users.add(user);
+        users.add(user);
     }
 
     protected void removeUser(User user) {
-        this.users.remove(user);
+        users.remove(user);
+    }
+
+    public boolean contains(User user) {
+        return users.contains(user);
     }
 
     public boolean appliesToRepository(String repository) {

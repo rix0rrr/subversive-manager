@@ -1,6 +1,8 @@
 
 package nl.rix0r.subversive.subversion;
 
+import java.io.Serializable;
+
 /**
  * Permissions granted to a user for a directory
  * 
@@ -9,7 +11,7 @@ package nl.rix0r.subversive.subversion;
  *
  * @author rix0rrr
  */
-public class Permission implements Comparable {
+public class Permission implements Comparable, Serializable {
     private Principal principal;
     private Access    access;
     private Directory directory;

@@ -1,6 +1,8 @@
 
 package nl.rix0r.subversive.subversion;
 
+import java.io.Serializable;
+
 /**
  * General term for an entity that can be assigned permissions
  *
@@ -8,5 +10,5 @@ package nl.rix0r.subversive.subversion;
  *
  * @author rix0rrr
  */
-public interface Principal {
+public interface Principal extends Serializable {
 }

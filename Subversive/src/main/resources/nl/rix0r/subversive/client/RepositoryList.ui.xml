@@ -1,0 +1,9 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+    xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:style>.error { color: red; }</ui:style>
+
+    <g:VerticalPanel>
+        <g:cell><g:Label ui:field="errorLabel" styleName="{style.error}" /></g:cell>
+        <g:cell><g:VerticalPanel ui:field="repoList" /></g:cell>
+    </g:VerticalPanel>
+</ui:UiBinder>
