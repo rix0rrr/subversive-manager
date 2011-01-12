@@ -17,7 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
  *
  * @author rix0rrr
  */
-public class LoginDialog extends Composite implements ApplicationScreen {
+public class LoginDialog extends Composite {
     interface MyUiBinder extends UiBinder<Widget, LoginDialog> { };
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
@@ -26,7 +26,6 @@ public class LoginDialog extends Composite implements ApplicationScreen {
     @UiField TextBox username;
     @UiField TextBox password;
     @UiField Button loginButton;
-    @UiField Label errorLabel;
 
     public LoginDialog(LoginHandler loginHandler) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -50,17 +49,12 @@ public class LoginDialog extends Composite implements ApplicationScreen {
     }
 
     void handleKey(KeyUpEvent e) {
-        displayError("");
         if (e.getNativeKeyCode() == KeyCodes.KEY_ENTER /* enter */)
             doLogin();
     }
 
     private void doLogin() {
         loginHandler.tryLogin(username.getText(), password.getText());
-    }
-
-    public void displayError(String message) {
-        errorLabel.setText(message);
     }
 
     public interface LoginHandler {

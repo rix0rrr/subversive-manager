@@ -2,6 +2,7 @@
 package nl.rix0r.subversive.subversion;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * A directory in a repository
@@ -23,6 +24,42 @@ public class Directory implements Comparable, Serializable {
 
     public String path() {
         return path;
+    }
+
+    /**
+     * Return the last segment (name) of the path, or "/"
+     * if this directory is the root
+     */
+    public String lastSegment() {
+        if (root()) return "/";
+        int ix = path.lastIndexOf("/");
+        return path.substring(ix + 1);
+    }
+
+    /**
+     * Add the root path to the current directory to the given list
+     */
+    public void addRootPath(List<Directory> into) {
+        if (!root()) parent().addRootPath(into);
+        into.add(this);
+    }
+
+    /**
+     * Returns the parent directory of this directory
+     *
+     * Returns the root if this directory is already the root
+     */
+    public Directory parent() {
+        if (root()) return this;
+        int ix = path.lastIndexOf("/");
+        return new Directory(repository, path.substring(0, ix));
+    }
+
+    /**
+     * Returns true iff this is the root path (/)
+     */
+    public boolean root() {
+        return path.equals("/");
     }
 
     private String makeAbsolute(String path) {

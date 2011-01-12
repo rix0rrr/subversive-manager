@@ -1,0 +1,49 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+    xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:s='urn:import:nl.rix0r.subversive.client'>
+
+    <g:HTMLPanel>
+        <h2><g:Label ui:field="repoTitle" /></h2>
+        <g:Hyperlink targetHistoryToken="">&lt;&lt; Back to repository list</g:Hyperlink>
+        <table valign="top">
+            <tr>
+                <td>
+                    Directories
+                    <g:DecoratorPanel>
+                        <s:DirectoryTree width="200px" height="400px" ui:field="directoryTree" />
+                    </g:DecoratorPanel>
+                </td>
+                <td>
+                    <g:Label ui:field="selectedDirectory" />
+                    <g:DecoratorPanel>
+                        <g:ScrollPanel width="300px" height="400px">
+                            <s:PermissionsList ui:field="permissions" width="100%" />
+                        </g:ScrollPanel>
+                    </g:DecoratorPanel>
+                </td>
+                <td valign="middle">
+                    <g:Button width="100%">&lt; Assign</g:Button><br />
+                    <g:Button width="100%">Remove &gt;</g:Button>
+                </td>
+                <td>
+                    <g:TabLayoutPanel width="200px" height="400px" barUnit="EM" barHeight="1.5">
+                        <g:tab>
+                            <g:header>Users</g:header>
+                            <g:Label>Users</g:Label>
+                        </g:tab>
+                        <g:tab>
+                            <g:header>Groups</g:header>
+                            <g:HTMLPanel>
+                                <g:Button>New</g:Button>
+                                <g:Button>Edit</g:Button>
+                                <g:Button>Delete</g:Button>
+                            </g:HTMLPanel>
+                        </g:tab>
+                    </g:TabLayoutPanel>
+                </td>
+            </tr>
+        </table>
+        <g:Button ui:field="saveButton">Save</g:Button>
+    </g:HTMLPanel>
+</ui:UiBinder>

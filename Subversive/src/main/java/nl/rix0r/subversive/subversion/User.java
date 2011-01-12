@@ -31,6 +31,10 @@ public class User implements Principal {
         return username;
     }
 
+    public boolean matches(String like) {
+        return username.contains(like) || fullName.contains(like);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {

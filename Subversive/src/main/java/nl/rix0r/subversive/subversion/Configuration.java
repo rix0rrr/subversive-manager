@@ -71,20 +71,28 @@ public class Configuration implements Serializable {
     /**
      * Return a subset of Configuration restricted to the given repository
      *
-     * Global groups are also returned.
+     * Global groups are also returned. If repository is null, no
+     * filtering is done.
      */
     public Configuration subset(String repository) {
         Configuration ret = new Configuration();
 
         for (GroupDefinition def: definitions.values())
-            if (def.appliesToRepository(repository))
+            if (repository == null || def.appliesToRepository(repository))
                 addGroupDefinition(new GroupDefinition(def));
 
         for (Permission perm: permissions)
-            if (perm.appliesToRepository(repository))
+            if (repository == null || perm.appliesToRepository(repository))
                 ret.addPermission(new Permission(perm));
 
         return ret;
+    }
+
+    /**
+     * Returns a copy of the configuration
+     */
+    public Configuration copy() {
+        return subset(null);
     }
 
     /**

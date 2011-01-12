@@ -6,4 +6,19 @@
                 <goal>gwt:run</goal>
             </goals>
         </action>
+        <action>
+            <actionName>debug</actionName>
+            <goals>
+                <goal>gwt:debug</goal>
+            </goals>
+            <properties>
+                <exec.classpathScope>${classPathScope}</exec.classpathScope>
+                
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath ${packageClassName}</exec.args>
+                
+                <jpda.stopclass>${packageClassName}</jpda.stopclass>
+                <attachDebugger>${jpda.address}</attachDebugger>
+                <exec.executable>java</exec.executable>
+            </properties>
+        </action>
     </actions>
