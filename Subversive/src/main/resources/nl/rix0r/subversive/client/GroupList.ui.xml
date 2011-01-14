@@ -3,13 +3,13 @@
     xmlns:ss='urn:import:nl.rix0r.subversive.client.generic'>
 
     <g:DockLayoutPanel unit="EM">
+        <g:north size="2">
+            <ss:HintTextBox ui:field="searchField" hint="Filter..." />
+        </g:north>
         <g:center>
-            <g:ScrollPanel width="100%">
-                <g:Tree ui:field="tree" />
+            <g:ScrollPanel width="100%" height="100%">
+                <g:Widget ui:field="groups" width="100%" />
             </g:ScrollPanel>
         </g:center>
-        <g:south size="2">
-            <ss:HintTextBox ui:field="customDirField" hint="Unlisted directory..." />
-        </g:south>
     </g:DockLayoutPanel>
 </ui:UiBinder>

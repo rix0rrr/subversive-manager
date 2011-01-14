@@ -79,7 +79,7 @@ public class Configuration implements Serializable {
 
         for (GroupDefinition def: definitions.values())
             if (repository == null || def.appliesToRepository(repository))
-                addGroupDefinition(new GroupDefinition(def));
+                ret.addGroupDefinition(new GroupDefinition(def));
 
         for (Permission perm: permissions)
             if (repository == null || perm.appliesToRepository(repository))

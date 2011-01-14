@@ -1,19 +1,23 @@
 
 package nl.rix0r.subversive.client;
 
-import com.google.gwt.user.client.ui.FlexTable;
-import java.util.List;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import nl.rix0r.subversive.client.PermissionsList.PrincipalAccess;
+import nl.rix0r.subversive.client.generic.SelectableTable;
+import nl.rix0r.subversive.client.generic.SelectableTable.Row;
 import nl.rix0r.subversive.subversion.Access;
-import nl.rix0r.subversive.subversion.Anonymous;
-import nl.rix0r.subversive.subversion.Group;
 import nl.rix0r.subversive.subversion.Permission;
 import nl.rix0r.subversive.subversion.Principal;
-import nl.rix0r.subversive.subversion.User;
 
 /**
  * @author rix0rrr
  */
-public class PermissionsList extends FlexTable {
+public class PermissionsList extends SelectableTable<PrincipalAccess> {
+    public PermissionsList() {
+        getColumnFormatter().setWidth(0, "16px");
+        getColumnFormatter().setWidth(2, "100px");
+    }
 
     /**
      * Add all permissions in the given list to the table
@@ -26,17 +30,51 @@ public class PermissionsList extends FlexTable {
     }
 
     public void addPrincipal(Principal principal, Access access) {
-        int row = getRowCount();
-
-        setText(row, 0, principalImage(principal));
-        setText(row, 1, principal.toString());
-        setWidget(row, 2, new AccessDropdown(access));
+        getModel().add(new PrincipalAccess(principal, access));
     }
 
-    private String principalImage(Principal principal) {
-        if (principal instanceof User) return "user";
-        if (principal instanceof Group) return "group";
-        if (principal instanceof Anonymous) return "anon";
-        return "?";
+    public void clear() {
+        getModel().clear();
     }
+
+    @Override
+    protected void initializeRow(final PrincipalAccess element, Row row) {
+        final AccessDropdown dd = new AccessDropdown(element.access);
+
+        // Upon changing the dropdown, save back to the model record
+        dd.addChangeHandler(new ChangeHandler() {
+            public void onChange(ChangeEvent event) {
+                element.access = dd.getAccess();
+            }
+        });
+
+        row.widgets.put("image", IconProvider.principal(element.principal));
+        row.widgets.put("dropdown", dd);
+    }
+
+    public PrincipalAccess getSelected() {
+        return getModel().get(getSelectedRow());
+    }
+
+    public void remove(PrincipalAccess pa) {
+        getModel().remove(pa);
+    }
+
+    @Override
+    protected void renderRow(int i, PrincipalAccess element, Row row) {
+        setWidget(i, 0, row.widgets.get("image"));
+        setText(i, 1, element.principal.toString());
+        setWidget(i, 2, row.widgets.get("dropdown"));
+    }
+
+    public static class PrincipalAccess {
+        public final Principal principal;
+        public Access access;
+
+        public PrincipalAccess(Principal principal, Access access) {
+            this.principal = principal;
+            this.access    = access;
+        }
+    }
+
 }

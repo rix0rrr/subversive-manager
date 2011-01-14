@@ -23,22 +23,29 @@
                     </g:DecoratorPanel>
                 </td>
                 <td valign="middle">
-                    <g:Button width="100%">&lt; Assign</g:Button><br />
-                    <g:Button width="100%">Remove &gt;</g:Button>
+                    <g:Button width="100%" ui:field="assignButton">&lt; Assign</g:Button><br />
+                    <g:Button width="100%" ui:field="removeButton">Remove &gt;</g:Button>
                 </td>
                 <td>
                     <g:TabLayoutPanel width="200px" height="400px" barUnit="EM" barHeight="1.5">
                         <g:tab>
                             <g:header>Users</g:header>
-                            <g:Label>Users</g:Label>
+                            <s:UserList />
                         </g:tab>
                         <g:tab>
                             <g:header>Groups</g:header>
-                            <g:HTMLPanel>
-                                <g:Button>New</g:Button>
-                                <g:Button>Edit</g:Button>
-                                <g:Button>Delete</g:Button>
-                            </g:HTMLPanel>
+                            <g:DockLayoutPanel unit="EM">
+                                <g:center>
+                                    <s:GroupList ui:field="groups" />
+                                </g:center>
+                                <g:south size="2">
+                                    <g:HTMLPanel>
+                                        <g:Button>New</g:Button>
+                                        <g:Button>Edit</g:Button>
+                                        <g:Button>Delete</g:Button>
+                                    </g:HTMLPanel>
+                                </g:south>
+                            </g:DockLayoutPanel>
                         </g:tab>
                     </g:TabLayoutPanel>
                 </td>

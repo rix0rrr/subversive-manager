@@ -13,6 +13,9 @@ public class Group implements Principal {
     private String repository;
     private String name;
 
+    protected Group() {
+    }
+
     public Group(String name) {
         this.repository = "";
         this.name       = name;
@@ -41,7 +44,7 @@ public class Group implements Principal {
 
     @Override
     public String toString() {
-        return name;
+        return name + (global() ? " (global)" : "");
     }
 
     @Override

@@ -1,0 +1,9 @@
+.selected {
+    background: #8295d3;
+    color: white;
+}
+
+.gwt-TextBox-hint {
+    color: #888;
+    font-style: italic;
+}
