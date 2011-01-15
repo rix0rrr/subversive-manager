@@ -41,12 +41,16 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
         return addHandler(handler, SelectionEvent.getType());
     }
 
+    public Directory selected() {
+        TreeItem selected = tree.getSelectedItem();
+        return selected == null ? null : (Directory)selected.getUserObject();
+    }
+
     /**
      * Fire the currently selected directory as an event
      */
     private void fireSelected() {
-        TreeItem selected = tree.getSelectedItem();
-        SelectionEvent.fire(this, selected == null ? null : (Directory)selected.getUserObject());
+        SelectionEvent.fire(this, selected());
     }
 
     /**

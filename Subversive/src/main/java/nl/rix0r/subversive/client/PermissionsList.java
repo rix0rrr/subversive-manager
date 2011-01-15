@@ -3,6 +3,10 @@ package nl.rix0r.subversive.client;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import nl.rix0r.subversive.client.PermissionsList.PrincipalAccess;
 import nl.rix0r.subversive.client.generic.SelectableTable;
 import nl.rix0r.subversive.client.generic.SelectableTable.Row;
@@ -13,7 +17,9 @@ import nl.rix0r.subversive.subversion.Principal;
 /**
  * @author rix0rrr
  */
-public class PermissionsList extends SelectableTable<PrincipalAccess> {
+public class PermissionsList extends SelectableTable<PrincipalAccess>
+        implements HasValueChangeHandlers<PrincipalAccess> {
+
     public PermissionsList() {
         getColumnFormatter().setWidth(0, "16px");
         getColumnFormatter().setWidth(2, "100px");
@@ -52,6 +58,7 @@ public class PermissionsList extends SelectableTable<PrincipalAccess> {
         dd.addChangeHandler(new ChangeHandler() {
             public void onChange(ChangeEvent event) {
                 element.access = dd.getAccess();
+                fireValueChanged(element);
             }
         });
 
@@ -72,6 +79,14 @@ public class PermissionsList extends SelectableTable<PrincipalAccess> {
         setWidget(i, 0, row.widgets.get("image"));
         setText(i, 1, element.principal.toString());
         setWidget(i, 2, row.widgets.get("dropdown"));
+    }
+
+    private void fireValueChanged(PrincipalAccess pa) {
+        ValueChangeEvent.fire(this, pa);
+    }
+
+    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<PrincipalAccess> handler) {
+        return addHandler(handler, ValueChangeEvent.getType());
     }
 
     public static class PrincipalAccess {
