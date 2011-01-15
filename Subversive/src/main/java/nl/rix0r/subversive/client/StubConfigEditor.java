@@ -16,7 +16,7 @@ import nl.rix0r.subversive.subversion.User;
  *
  * @author rix0rrr
  */
-public class StubConfigEditor implements ConfigEditorServiceAsync {
+public class StubConfigEditor implements ConfigEditorServiceAsync, UserRetrievalServiceAsync {
     private List<User> allUsers = new ArrayList<User>() {{
         add(new User("alice",  "Alice Krieger"));
         add(new User("bob",    "Uncle Bob"));
@@ -62,6 +62,10 @@ public class StubConfigEditor implements ConfigEditorServiceAsync {
         callback.onSuccess(new EditSession(repository, configuration.subset(repository)));
     }
 
+    public void initialUserSet(AsyncCallback<List<User>> callback) {
+        callback.onSuccess(new ArrayList<User>(allUsers));
+    }
+
     public void findUsers(String like, AsyncCallback<List<User>> callback) {
         List<User> ret = new ArrayList<User>();
         for (User user: allUsers)
@@ -93,4 +97,5 @@ public class StubConfigEditor implements ConfigEditorServiceAsync {
         if (!ok) onFail.onFailure(new ServiceException("Invalid username or password. Try again."));
         return ok;
     }
+
 }

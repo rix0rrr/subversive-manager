@@ -30,13 +30,15 @@ public class EditorWindow extends Composite {
     @UiField Button assignButton;
     @UiField Button removeButton;
     @UiField GroupList groups;
+    @UiField UserList users;
 
     private EditSession editSession;
 
-    public EditorWindow(EditSession editSession) {
+    public EditorWindow(EditSession editSession, UserRetrievalServiceAsync userRetrieval) {
         initWidget(uiBinder.createAndBindUi(this));
         wireUp();
         setEditSession(editSession);
+        users.setUserRetrievalService(userRetrieval);
     }
 
     public void setEditSession(EditSession editSession) {

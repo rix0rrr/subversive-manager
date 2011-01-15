@@ -30,7 +30,7 @@
                     <g:TabLayoutPanel width="200px" height="400px" barUnit="EM" barHeight="1.5">
                         <g:tab>
                             <g:header>Users</g:header>
-                            <s:UserList />
+                            <s:UserList ui:field="users" />
                         </g:tab>
                         <g:tab>
                             <g:header>Groups</g:header>

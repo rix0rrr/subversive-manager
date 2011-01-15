@@ -48,6 +48,7 @@ public class GroupList extends Composite {
      */
     private void updateModelOnFilter() {
         groups.getModel().replace(matchingGroups(searchField.getValue()));
+        groups.setSelectedRow(0);
     }
 
     private List<Group> matchingGroups(String filter) {

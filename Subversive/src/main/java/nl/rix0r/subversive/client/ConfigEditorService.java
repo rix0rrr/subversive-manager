@@ -6,7 +6,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import java.util.List;
 import nl.rix0r.subversive.subversion.EditSession;
 import nl.rix0r.subversive.subversion.Modification;
-import nl.rix0r.subversive.subversion.User;
 
 /**
  * The editor interface provided by the server
@@ -27,11 +26,6 @@ public interface ConfigEditorService extends RemoteService {
      * Start editing the given repository
      */
     public EditSession begin(String repository, String username, String password) throws ServiceException;
-
-    /**
-     * Find available users with a name like the given string
-     */
-    public List<User> findUsers(String like) throws ServiceException;
 
     /**
      * Find all repository that can be managed by the given user

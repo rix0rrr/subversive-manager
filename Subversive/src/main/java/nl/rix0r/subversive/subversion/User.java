@@ -35,7 +35,7 @@ public class User implements Principal {
     }
 
     public boolean matches(String like) {
-        return username.contains(like) || fullName.contains(like);
+        return username.toLowerCase().contains(like.toLowerCase()) || fullName.contains(like.toLowerCase());
     }
 
     @Override

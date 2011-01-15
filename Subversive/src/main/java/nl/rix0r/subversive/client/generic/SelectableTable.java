@@ -49,6 +49,8 @@ abstract public class SelectableTable<T> extends FlexTable {
     }
 
     public void setSelectedRow(int rowIndex, boolean fireEvent) {
+        if (selectedRow < 0) selectedRow = -1;
+        if (selectedRow >= getRowCount()) selectedRow = getRowCount() - 1;
         this.selectedRow = rowIndex;
         updateCellStyles();
     }

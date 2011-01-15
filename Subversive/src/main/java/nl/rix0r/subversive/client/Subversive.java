@@ -18,14 +18,18 @@ import nl.rix0r.subversive.subversion.EditSession;
  */
 public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     private ConfigEditorServiceAsync configEditor;
+    private UserRetrievalServiceAsync userService;
 
     private LoginDialog loginDialog = new LoginDialog(this);
     private String username;
     private String password;
-    private Label errorLabel = new Label("");
+    private static Label errorLabel = new Label("");
 
     public Subversive() {
-        configEditor = new StubConfigEditor();
+        StubConfigEditor stub = new StubConfigEditor();
+        configEditor = stub;
+        userService = stub;
+
         errorLabel.setStyleName("gwt-errorMessage");
     }
 
@@ -67,7 +71,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
         setError("");
         configEditor.begin(repository, username, password, new Callback<EditSession>() {
             public void onSuccess(EditSession result) {
-                display(new EditorWindow(result));
+                display(new EditorWindow(result, userService));
             }
         });
     }
@@ -88,11 +92,11 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
         dispatchOnToken(historyToken);
     }
 
-    private void setError(String message) {
+    private static void setError(String message) {
         errorLabel.setText(message);
     }
 
-    abstract private class Callback<T> implements AsyncCallback<T> {
+    abstract public static class Callback<T> implements AsyncCallback<T> {
         public void onFailure(Throwable caught) {
             setError(caught.getMessage());
         }

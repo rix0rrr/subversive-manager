@@ -4,6 +4,8 @@ package nl.rix0r.subversive.server;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import java.util.List;
 import nl.rix0r.subversive.client.ConfigEditorService;
+import nl.rix0r.subversive.client.ServiceException;
+import nl.rix0r.subversive.client.UserRetrievalService;
 import nl.rix0r.subversive.subversion.EditSession;
 import nl.rix0r.subversive.subversion.Modification;
 import nl.rix0r.subversive.subversion.User;
@@ -12,7 +14,7 @@ import nl.rix0r.subversive.subversion.User;
  *
  * @author rix0rrr
  */
-public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigEditorService {
+public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigEditorService, UserRetrievalService {
 
     public List<String> apply(List<Modification> modifications, String username, String password) {
         return null;
@@ -27,6 +29,10 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
     }
 
     public List<String> myRepositories(String username, String password) {
+        return null;
+    }
+
+    public List<User> initialUserSet() throws ServiceException {
         return null;
     }
 }
