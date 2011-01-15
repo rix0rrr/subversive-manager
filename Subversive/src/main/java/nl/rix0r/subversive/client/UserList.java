@@ -5,7 +5,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.logical.shared.HasOpenHandlers;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -25,7 +28,9 @@ import nl.rix0r.subversive.subversion.User;
  *
  * @author rix0rrr
  */
-public class UserList extends Composite implements HasSelectionHandlers<User> {
+public class UserList extends Composite implements
+        HasSelectionHandlers<User>, HasOpenHandlers<User> {
+
     interface MyUiBinder extends UiBinder<Widget, UserList> { };
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
@@ -41,7 +46,7 @@ public class UserList extends Composite implements HasSelectionHandlers<User> {
 
         users.addDoubleClickHandler(new DoubleClickHandler() {
             public void onDoubleClick(DoubleClickEvent event) {
-                fireSelectionEvent();
+                fireOpenEvent();
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -82,17 +87,21 @@ public class UserList extends Composite implements HasSelectionHandlers<User> {
     };
 
     public User selected() {
-        return users.getModel().get(users.getSelectedRow());
+        return users.selected();
     }
 
     public HandlerRegistration addSelectionHandler(SelectionHandler<User> handler) {
-        return addHandler(handler, SelectionEvent.getType());
+        return users.addSelectionHandler(handler);
+    }
+
+    public HandlerRegistration addOpenHandler(OpenHandler<User> handler) {
+        return addHandler(handler, OpenEvent.getType());
     }
 
     @UiHandler("searchField")
     void onKeyUp(KeyUpEvent e) {
         if (e.getNativeKeyCode() == 13)
-            fireSelectionEvent();
+            fireOpenEvent();
         else
             retrieveBasedOnFilter();
     }
@@ -100,9 +109,9 @@ public class UserList extends Composite implements HasSelectionHandlers<User> {
     /**
      * Fire a selection event on the selected element
      */
-    private void fireSelectionEvent() {
+    private void fireOpenEvent() {
         if (selected() != null)
-            SelectionEvent.fire(this, selected());
+            OpenEvent.fire(this, selected());
     }
 
     public static class UserSelectList extends SelectableTable<User> {

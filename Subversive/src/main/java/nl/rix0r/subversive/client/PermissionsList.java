@@ -46,10 +46,6 @@ public class PermissionsList extends SelectableTable<PrincipalAccess>
         return false;
     }
 
-    public void clear() {
-        getModel().clear();
-    }
-
     @Override
     protected void initializeRow(final PrincipalAccess element, Row row) {
         final AccessDropdown dd = new AccessDropdown(element.access);

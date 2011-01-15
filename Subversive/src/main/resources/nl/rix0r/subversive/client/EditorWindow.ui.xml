@@ -41,9 +41,9 @@
                                 </g:center>
                                 <g:south size="2">
                                     <g:HTMLPanel>
-                                        <g:Button>New</g:Button>
-                                        <g:Button>Edit</g:Button>
-                                        <g:Button>Delete</g:Button>
+                                        <g:Button ui:field="newGroupButton">New</g:Button>
+                                        <g:Button ui:field="editGroupButton">Edit</g:Button>
+                                        <g:Button ui:field="deleteGroupButton">Delete</g:Button>
                                     </g:HTMLPanel>
                                 </g:south>
                             </g:DockLayoutPanel>
@@ -52,6 +52,7 @@
                 </td>
             </tr>
         </table>
+        <g:Button ui:field="undoButton">Undo</g:Button>
         <g:Button ui:field="saveButton">Save</g:Button>
     </g:HTMLPanel>
 </ui:UiBinder>

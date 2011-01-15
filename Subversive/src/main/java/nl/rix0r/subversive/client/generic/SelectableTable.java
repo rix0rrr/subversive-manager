@@ -3,8 +3,12 @@ package nl.rix0r.subversive.client.generic;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Widget;
 import java.util.HashMap;
@@ -16,7 +20,9 @@ import java.util.Set;
  *
  * @author rix0rrr
  */
-abstract public class SelectableTable<T> extends FlexTable {
+abstract public class SelectableTable<T> extends FlexTable
+        implements HasSelectionHandlers<T> {
+
     private int selectedRow       = -1;
     private ListModel<T> model    = new ListModel<T>();
     private Map<T, Row> rows = new HashMap<T, Row>();
@@ -38,8 +44,25 @@ abstract public class SelectableTable<T> extends FlexTable {
         });
     }
 
+    @Override
+    public void clear() {
+        getModel().clear();
+    }
+
     public ListModel<T> getModel() {
         return model;
+    }
+
+    public T selected() {
+        return getModel().get(getSelectedRow());
+    }
+
+    private void fireSelectionEvent() {
+        SelectionEvent.fire(this, selected());
+    }
+
+    public HandlerRegistration addSelectionHandler(SelectionHandler<T> handler) {
+        return addHandler(handler, SelectionEvent.getType());
     }
 
     private void updateCellStyles() {
@@ -53,6 +76,7 @@ abstract public class SelectableTable<T> extends FlexTable {
         if (selectedRow >= getRowCount()) selectedRow = getRowCount() - 1;
         this.selectedRow = rowIndex;
         updateCellStyles();
+        if (fireEvent) fireSelectionEvent();
     }
 
     public void setSelectedRow(int rowIndex) {

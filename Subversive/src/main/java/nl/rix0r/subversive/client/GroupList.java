@@ -5,8 +5,10 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.logical.shared.HasOpenHandlers;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
-import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -25,7 +27,8 @@ import nl.rix0r.subversive.subversion.Group;
  *
  * @author rix0rrr
  */
-public class GroupList extends Composite implements HasSelectionHandlers<Group> {
+public class GroupList extends Composite implements
+        HasSelectionHandlers<Group>, HasOpenHandlers<Group> {
 
     interface MyUiBinder extends UiBinder<Widget, GroupList> { };
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
@@ -41,7 +44,7 @@ public class GroupList extends Composite implements HasSelectionHandlers<Group> 
 
         groups.addDoubleClickHandler(new DoubleClickHandler() {
             public void onDoubleClick(DoubleClickEvent event) {
-                fireSelectionEvent();
+                fireOpenEvent();
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -56,13 +59,13 @@ public class GroupList extends Composite implements HasSelectionHandlers<Group> 
     @UiHandler("searchField")
     void keyUp(KeyUpEvent e) {
         if (e.getNativeKeyCode() == 13)
-            fireSelectionEvent();
+            fireOpenEvent();
         else
             updateModelOnFilter();
     }
 
     public Group selected() {
-        return groups.getModel().get(groups.getSelectedRow());
+        return groups.selected();
     }
 
     /**
@@ -82,15 +85,19 @@ public class GroupList extends Composite implements HasSelectionHandlers<Group> 
     }
 
     public HandlerRegistration addSelectionHandler(SelectionHandler<Group> handler) {
-        return addHandler(handler, SelectionEvent.getType());
+        return groups.addSelectionHandler(handler);
+    }
+
+    public HandlerRegistration addOpenHandler(OpenHandler<Group> handler) {
+        return addHandler(handler, OpenEvent.getType());
     }
 
     /**
      * Fire a selection event on the selected element
      */
-    private void fireSelectionEvent() {
+    private void fireOpenEvent() {
         if (selected() != null)
-            SelectionEvent.fire(this, selected());
+            OpenEvent.fire(this, selected());
     }
 
     public static class GroupSelectList extends SelectableTable<Group> {

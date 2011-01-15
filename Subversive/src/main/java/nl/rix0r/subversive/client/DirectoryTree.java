@@ -58,6 +58,8 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
      * directories that are not actually in the given set
      */
     public void load(List<Directory> directories) {
+        tree.clear();
+
         DirectoryStructure ds = new DirectoryStructure();
         ds.add(directories);
         ds.walk(new DirWalker<TreeItem>() {

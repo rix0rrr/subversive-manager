@@ -6,6 +6,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.HasCloseHandlers;
+import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -27,6 +28,7 @@ import nl.rix0r.subversive.subversion.GrantPermission;
 import nl.rix0r.subversive.subversion.Group;
 import nl.rix0r.subversive.subversion.Permission;
 import nl.rix0r.subversive.subversion.Principal;
+import nl.rix0r.subversive.subversion.RemoveGroup;
 import nl.rix0r.subversive.subversion.RevokePermission;
 import nl.rix0r.subversive.subversion.User;
 
@@ -39,12 +41,17 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
     @UiField Button saveButton;
+    @UiField Button undoButton;
     @UiField PermissionsList permissions;
     @UiField Label repoTitle;
     @UiField DirectoryTree directoryTree;
     @UiField Label selectedDirectory;
     @UiField Button assignButton;
     @UiField Button removeButton;
+    @UiField Button anonymousButton;
+    @UiField Button newGroupButton;
+    @UiField Button editGroupButton;
+    @UiField Button deleteGroupButton;
     @UiField GroupList groups;
     @UiField UserList users;
     @UiField TabLayoutPanel tabpanel;
@@ -67,8 +74,31 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         repoTitle.setText(editSession.repository());
         directoryTree.load(editSession.configuredDirectories());
         groups.setGroups(editSession.availableGroups());
+        refreshPermissions();
+        refreshButtonStates();
     }
 
+    /**
+     * Refresh button states (enabled or disabled)
+     *
+     * Call this if you know nothing else has changed.
+     */
+    private void refreshButtonStates() {
+        undoButton.setEnabled(editSession.canUndo());
+        assignButton.setEnabled(
+                (tabpanel.getSelectedIndex() == 0 && users.selected() != null && !permissions.containsPrincipal(users.selected()))
+                || (groups.selected() != null && !permissions.containsPrincipal(groups.selected())));
+        anonymousButton.setEnabled(!permissions.containsPrincipal(new Anonymous()));
+        removeButton.setEnabled(permissions.selected() != null);
+        editGroupButton.setEnabled(groups.selected() != null && userCanEditGroup(groups.selected()));
+        deleteGroupButton.setEnabled(editGroupButton.isEnabled());
+    }
+
+    /**
+     * Refresh the permissions list
+     *
+     * Call this if you know it's the only thing that needs updating.
+     */
     public void refreshPermissions() {
         Directory directory = directoryTree.selected();
         permissions.clear();
@@ -76,6 +106,10 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         if (directory == null) return;
         selectedDirectory.setText(directory.path());
         permissions.add(editSession.permissions(directory));
+
+        // Doesn't really have anything to do with that but
+        // always seems to go hand-in-hand.
+        refreshButtonStates();
     }
 
     private void wireUp() {
@@ -103,6 +137,12 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         editingDone();
     }
 
+    @UiHandler("undoButton")
+    void undoButtonClicked(ClickEvent e) {
+        editSession.undo();
+        refresh();
+    }
+
     @UiHandler("removeButton")
     void handleRemove(ClickEvent e) {
         PrincipalAccess pa = permissions.getSelected();
@@ -123,18 +163,58 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     }
 
     @UiHandler("users")
-    void handleUserSelection(SelectionEvent<User> e) {
-        grantNewPermissions(e.getSelectedItem());
+    void handleUserOpen(OpenEvent<User> e) {
+        grantNewPermissions(e.getTarget());
+    }
+
+    @UiHandler("users")
+    void userSelectionChanged(SelectionEvent<User> e) {
+        refreshButtonStates();
     }
 
     @UiHandler("groups")
-    void handleGroupSelection(SelectionEvent<Group> e) {
-        grantNewPermissions(e.getSelectedItem());
+    void handleGroupOpen(OpenEvent<Group> e) {
+        grantNewPermissions(e.getTarget());
+    }
+
+    @UiHandler("groups")
+    void groupSelectionChanged(SelectionEvent<Group> e) {
+        refreshButtonStates();
+    }
+
+    @UiHandler("permissions")
+    void permissionsSelectionChanged(SelectionEvent<PrincipalAccess> e) {
+        refreshButtonStates();
     }
 
     @UiHandler("permissions")
     void permissionChanged(ValueChangeEvent<PrincipalAccess> e) {
         grantChangedPermissions(e.getValue().principal, e.getValue().access);
+    }
+
+    @UiHandler("newGroupButton")
+    void newGroupClicked(ClickEvent e) {
+    }
+
+    @UiHandler("editGroupButton")
+    void editGroupClicked(ClickEvent e) {
+    }
+
+    @UiHandler("deleteGroupButton")
+    void deleteGroupClicked(ClickEvent e) {
+        if (userCanEditGroup(groups.selected()))
+            deleteGroup(groups.selected());
+    }
+
+    /**
+     * Returns whether the current user is allowed to edit
+     * the given group
+     *
+     * Currently, global groups cannot be edited from the
+     * editor.
+     */
+    private boolean userCanEditGroup(Group group) {
+        return !group.global();
     }
 
     /**
@@ -143,13 +223,13 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     private void grantNewPermissions(Principal principal) {
         if (principal == null || permissions.containsPrincipal(principal)) return;
         editSession.add(new GrantPermission(new Permission(currentDirectory(), principal, Access.Read)));
-        refreshPermissions();
+        refresh();
     }
 
     private void grantChangedPermissions(Principal principal, Access access) {
         if (principal == null) return;
         editSession.add(new GrantPermission(new Permission(currentDirectory(), principal, access)));
-        refreshPermissions();
+        refresh();
     }
 
     /**
@@ -162,6 +242,12 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     private void revokePermissions(Principal principal) {
         if (principal == null || !permissions.containsPrincipal(principal)) return;
         editSession.add(new RevokePermission(new Permission(currentDirectory(), principal, Access.Read)));
-        refreshPermissions();
+        refresh();
+    }
+
+    private void deleteGroup(Group group) {
+        if (group == null) return;
+        editSession.add(new RemoveGroup(group));
+        refresh();
     }
 }
