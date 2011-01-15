@@ -21,6 +21,10 @@ public class AddUserToGroup implements Modification {
         g.addUser(user);
     }
 
+    public String repository() {
+        return group.repository();
+    }
+
     @Override
     public String toString() {
         return "Add " + user + " to group " + group;

@@ -19,6 +19,10 @@ public class GrantPermission implements Modification {
         configuration.addPermission(permission);
     }
 
+    public String repository() {
+        return permission.directory().repository();
+    }
+
     @Override
     public String toString() {
         return "Grant " + permission;

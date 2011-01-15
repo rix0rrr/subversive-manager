@@ -21,6 +21,10 @@ public class RemoveUserFromGroup implements Modification {
         g.removeUser(user);
     }
 
+    public String repository() {
+        return group.repository();
+    }
+
     @Override
     public String toString() {
         return "Remove " + user + " from group " + group;

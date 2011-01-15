@@ -14,4 +14,9 @@ public interface Modification extends Serializable {
      * Apply the modification represented by this object to the Configuration
      */
     public void apply(Configuration configuration);
+
+    /**
+     * Return to which repository this modification applies
+     */
+    public String repository();
 }

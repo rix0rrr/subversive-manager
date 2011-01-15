@@ -17,6 +17,10 @@ public class RemoveGroup implements Modification {
         configuration.removeGroup(group);
     }
 
+    public String repository() {
+        return group.repository();
+    }
+
     @Override
     public String toString() {
         return "Remove group " + group;

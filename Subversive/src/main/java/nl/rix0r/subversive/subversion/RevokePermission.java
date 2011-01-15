@@ -19,6 +19,10 @@ public class RevokePermission implements Modification {
         configuration.removePermission(permission);
     }
 
+    public String repository() {
+        return permission.directory().repository();
+    }
+
     @Override
     public String toString() {
         return "Revoke " + permission;

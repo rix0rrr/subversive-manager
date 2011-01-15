@@ -17,6 +17,10 @@ public class NewGroup implements Modification {
         configuration.addGroup(group);
     }
 
+    public String repository() {
+        return group.repository();
+    }
+
     @Override
     public String toString() {
         return "Create group " + group;

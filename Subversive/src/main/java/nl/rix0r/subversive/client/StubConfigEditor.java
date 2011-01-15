@@ -9,6 +9,7 @@ import nl.rix0r.subversive.subversion.Configuration;
 import nl.rix0r.subversive.subversion.EditSession;
 import nl.rix0r.subversive.subversion.Group;
 import nl.rix0r.subversive.subversion.Modification;
+import nl.rix0r.subversive.subversion.ModificationException;
 import nl.rix0r.subversive.subversion.TestConfigurationBuilder;
 import nl.rix0r.subversive.subversion.User;
 
@@ -54,10 +55,33 @@ public class StubConfigEditor implements ConfigEditorServiceAsync, UserRetrieval
 
     public void apply(List<Modification> modifications, String username, String password, AsyncCallback<List<String>> callback) {
         if (!verifyPassword(username, password, callback)) return;
+
+        List<String> messages = new ArrayList<String>();
+        for (Modification mod: modifications) {
+            String message = applyModification(username, mod);
+            if (message != null) messages.add(message);
+        }
+        if (modifications.isEmpty())
+            messages.add("No changes made.");
+
+        callback.onSuccess(messages);
+    }
+
+    private String applyModification(String username, Modification mod) {
+        if (!canManageRepository(username, mod.repository()))
+            return "You're not allowed to manage repository " + mod.repository() + ". Sorry.";
+
+        try {
+            mod.apply(configuration);
+            return null;
+        } catch (ModificationException ex) {
+            return ex.getMessage();
+        }
     }
 
     public void begin(String repository, String username, String password, AsyncCallback<EditSession> callback) {
         if (!verifyPassword(username, password, callback)) return;
+        if (!verifyManageRepository(username, repository, callback)) return;
 
         callback.onSuccess(new EditSession(repository, configuration.subset(repository)));
     }
@@ -80,9 +104,9 @@ public class StubConfigEditor implements ConfigEditorServiceAsync, UserRetrieval
 
         List<String> ret = new ArrayList<String>();
 
-        if (username.equals("test")) {
-            ret.addAll(repositories);
-        }
+        for (String repository: repositories)
+            if (canManageRepository(username, repository))
+                ret.add(repository);
 
         callback.onSuccess(ret);
     }
@@ -98,4 +122,13 @@ public class StubConfigEditor implements ConfigEditorServiceAsync, UserRetrieval
         return ok;
     }
 
+    private boolean canManageRepository(String username, String repository) {
+        return username.equals("test");
+    }
+
+    private boolean verifyManageRepository(String username, String repository, AsyncCallback onFail) {
+        if (canManageRepository(username, repository)) return true;
+        onFail.onFailure(new ServiceException("You're not allowed to manage repository " + username + ". Sorry."));
+        return false;
+    }
 }

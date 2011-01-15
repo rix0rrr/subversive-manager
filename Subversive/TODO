@@ -1,6 +1,23 @@
-- Sorting of various lists
-- Making it pretty
-- Anonymous!
-- Retrieve fullname of users already in the permissions list
-- Change definition of (real) in directory tree from "existing" to "has permissions defined".
-- Add icons to directory tree
+CORE FEATURES
+    - Group Edits
+    - Add permissions for new directories
+    - Definition of "owners"
+
+
+USABILITY
+    - Retrieve directory information using the directory lister
+    - Change definition of (real) in directory tree from "existing" to "has permissions defined"
+      (therefore also refresh the directory tree when permissions changed)
+    - Retrieve fullname of users already in the permissions list
+    - Multiselect in lists
+
+
+AESTHETICS
+    - Sorting of user/group lists
+    - Add icons to directory tree
+    - Styling (a logo!)
+
+
+DEPLOYMENT
+    - Configuration
+    - Setup wizard

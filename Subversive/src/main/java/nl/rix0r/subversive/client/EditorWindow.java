@@ -3,9 +3,13 @@ package nl.rix0r.subversive.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.HasCloseHandlers;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -29,7 +33,8 @@ import nl.rix0r.subversive.subversion.User;
 /**
  * @author rix0rrr
  */
-public class EditorWindow extends Composite {
+public class EditorWindow extends Composite implements HasCloseHandlers<EditSession> {
+
     interface MyUiBinder extends UiBinder<Widget, EditorWindow> { };
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
@@ -81,8 +86,21 @@ public class EditorWindow extends Composite {
         });
     }
 
+    public HandlerRegistration addCloseHandler(CloseHandler<EditSession> handler) {
+        return addHandler(handler, CloseEvent.getType());
+    }
+
+    private void editingDone() {
+        CloseEvent.fire(this, editSession);
+    }
+
     private Directory currentDirectory() {
         return directoryTree.selected();
+    }
+
+    @UiHandler("saveButton")
+    void saveButtonClicked(ClickEvent e) {
+        editingDone();
     }
 
     @UiHandler("removeButton")

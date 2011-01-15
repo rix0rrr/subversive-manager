@@ -4,6 +4,7 @@ package nl.rix0r.subversive.subversion;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -108,5 +109,12 @@ public class EditSession implements Serializable {
      */
     public boolean canUndo() {
         return modifications.size() > 0;
+    }
+
+    /**
+     * Return a list of all current modifications
+     */
+    public List<Modification> modifications() {
+        return Collections.unmodifiableList(modifications);
     }
 }
