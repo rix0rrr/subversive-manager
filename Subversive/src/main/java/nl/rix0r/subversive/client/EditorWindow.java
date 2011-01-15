@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 import nl.rix0r.subversive.subversion.Access;
+import nl.rix0r.subversive.subversion.Anonymous;
 import nl.rix0r.subversive.subversion.Directory;
 import nl.rix0r.subversive.subversion.EditSession;
 import nl.rix0r.subversive.subversion.Group;
@@ -88,6 +89,11 @@ public class EditorWindow extends Composite {
             addPrincipal(users.selected());
         else
             addPrincipal(groups.selected());
+    }
+
+    @UiHandler("anonymousButton")
+    void handleAnonymousClick(ClickEvent e) {
+        addPrincipal(new Anonymous());
     }
 
     @UiHandler("users")

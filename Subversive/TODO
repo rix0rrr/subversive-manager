@@ -2,3 +2,5 @@
 - Making it pretty
 - Anonymous!
 - Retrieve fullname of users already in the permissions list
+- Change definition of (real) in directory tree from "existing" to "has permissions defined".
+- Add icons to directory tree

@@ -24,6 +24,7 @@
                 </td>
                 <td valign="middle">
                     <g:Button width="100%" ui:field="assignButton">&lt; Assign</g:Button><br />
+                    <g:Button width="100%" ui:field="anonymousButton">&lt; Anonymous</g:Button><br />
                     <g:Button width="100%" ui:field="removeButton">Remove &gt;</g:Button>
                 </td>
                 <td>
