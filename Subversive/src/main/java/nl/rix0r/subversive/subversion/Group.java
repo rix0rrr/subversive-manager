@@ -42,6 +42,10 @@ public class Group implements Principal {
         return global() || repository().equals(repository);
     }
 
+    public boolean matches(String text) {
+        return text == null || name.toLowerCase().contains(text.toLowerCase());
+    }
+
     @Override
     public String toString() {
         return name + (global() ? " (global)" : "");

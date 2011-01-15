@@ -59,6 +59,7 @@ public class HintTextBox extends TextBox {
     private void enter() {
         focused = true;
         if (empty) setValue("", false); // If the thing is supposed to be empty, make sure it is
+        empty = false; // empty conflicts with getText
 
         applyEmptyStyles();
     }

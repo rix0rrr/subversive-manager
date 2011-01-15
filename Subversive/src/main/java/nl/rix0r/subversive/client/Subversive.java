@@ -2,7 +2,6 @@
 package nl.rix0r.subversive.client;
 
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.HistoryListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -27,6 +26,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
 
     public Subversive() {
         configEditor = new StubConfigEditor();
+        errorLabel.setStyleName("gwt-errorMessage");
     }
 
     public void onModuleLoad() {
