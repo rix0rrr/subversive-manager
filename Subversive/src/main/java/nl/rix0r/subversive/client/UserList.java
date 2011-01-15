@@ -2,7 +2,13 @@
 package nl.rix0r.subversive.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -19,7 +25,7 @@ import nl.rix0r.subversive.subversion.User;
  *
  * @author rix0rrr
  */
-public class UserList extends Composite {
+public class UserList extends Composite implements HasSelectionHandlers<User> {
     interface MyUiBinder extends UiBinder<Widget, UserList> { };
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
@@ -32,6 +38,14 @@ public class UserList extends Composite {
     public UserList() {
         users = new UserSelectList();
         initWidget(uiBinder.createAndBindUi(this));
+
+        users.addDoubleClickHandler(new DoubleClickHandler() {
+            public void onDoubleClick(DoubleClickEvent event) {
+                fireSelectionEvent();
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
     }
 
     /**
@@ -67,9 +81,28 @@ public class UserList extends Composite {
         }
     };
 
+    public User selected() {
+        return users.getModel().get(users.getSelectedRow());
+    }
+
+    public HandlerRegistration addSelectionHandler(SelectionHandler<User> handler) {
+        return addHandler(handler, SelectionEvent.getType());
+    }
+
     @UiHandler("searchField")
     void onKeyUp(KeyUpEvent e) {
-        retrieveBasedOnFilter();
+        if (e.getNativeKeyCode() == 13)
+            fireSelectionEvent();
+        else
+            retrieveBasedOnFilter();
+    }
+
+    /**
+     * Fire a selection event on the selected element
+     */
+    private void fireSelectionEvent() {
+        if (selected() != null)
+            SelectionEvent.fire(this, selected());
     }
 
     public static class UserSelectList extends SelectableTable<User> {

@@ -27,7 +27,7 @@
                     <g:Button width="100%" ui:field="removeButton">Remove &gt;</g:Button>
                 </td>
                 <td>
-                    <g:TabLayoutPanel width="200px" height="400px" barUnit="EM" barHeight="1.5">
+                    <g:TabLayoutPanel width="200px" height="400px" barUnit="EM" barHeight="1.5" ui:field="tabpanel">
                         <g:tab>
                             <g:header>Users</g:header>
                             <s:UserList ui:field="users" />

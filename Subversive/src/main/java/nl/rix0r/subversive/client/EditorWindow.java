@@ -11,9 +11,14 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import nl.rix0r.subversive.subversion.Access;
 import nl.rix0r.subversive.subversion.Directory;
 import nl.rix0r.subversive.subversion.EditSession;
+import nl.rix0r.subversive.subversion.Group;
+import nl.rix0r.subversive.subversion.Principal;
+import nl.rix0r.subversive.subversion.User;
 
 /**
  * @author rix0rrr
@@ -31,6 +36,7 @@ public class EditorWindow extends Composite {
     @UiField Button removeButton;
     @UiField GroupList groups;
     @UiField UserList users;
+    @UiField TabLayoutPanel tabpanel;
 
     private EditSession editSession;
 
@@ -74,5 +80,28 @@ public class EditorWindow extends Composite {
     @UiHandler("removeButton")
     void handleRemove(ClickEvent e) {
         permissions.remove(permissions.getSelected());
+    }
+
+    @UiHandler("assignButton")
+    void handleAssignClick(ClickEvent e) {
+        if (tabpanel.getSelectedIndex() == 0)
+            addPrincipal(users.selected());
+        else
+            addPrincipal(groups.selected());
+    }
+
+    @UiHandler("users")
+    void handleUserSelection(SelectionEvent<User> e) {
+        addPrincipal(e.getSelectedItem());
+    }
+
+    @UiHandler("groups")
+    void handleGroupSelection(SelectionEvent<Group> e) {
+        addPrincipal(e.getSelectedItem());
+    }
+
+    private void addPrincipal(Principal principal) {
+        if (principal == null || permissions.containsPrincipal(principal)) return;
+        permissions.addPrincipal(principal, Access.Read);
     }
 }

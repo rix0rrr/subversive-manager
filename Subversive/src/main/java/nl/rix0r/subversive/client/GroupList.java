@@ -2,7 +2,13 @@
 package nl.rix0r.subversive.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -19,7 +25,8 @@ import nl.rix0r.subversive.subversion.Group;
  *
  * @author rix0rrr
  */
-public class GroupList extends Composite {
+public class GroupList extends Composite implements HasSelectionHandlers<Group> {
+
     interface MyUiBinder extends UiBinder<Widget, GroupList> { };
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
@@ -31,6 +38,14 @@ public class GroupList extends Composite {
     public GroupList() {
         groups = new GroupSelectList();
         initWidget(uiBinder.createAndBindUi(this));
+
+        groups.addDoubleClickHandler(new DoubleClickHandler() {
+            public void onDoubleClick(DoubleClickEvent event) {
+                fireSelectionEvent();
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        });
     }
 
     public void setGroups(List<Group> groups) {
@@ -40,7 +55,14 @@ public class GroupList extends Composite {
 
     @UiHandler("searchField")
     void keyUp(KeyUpEvent e) {
-        updateModelOnFilter();
+        if (e.getNativeKeyCode() == 13)
+            fireSelectionEvent();
+        else
+            updateModelOnFilter();
+    }
+
+    public Group selected() {
+        return groups.getModel().get(groups.getSelectedRow());
     }
 
     /**
@@ -57,6 +79,18 @@ public class GroupList extends Composite {
             if (g.matches(filter))
                 ret.add(g);
         return ret;
+    }
+
+    public HandlerRegistration addSelectionHandler(SelectionHandler<Group> handler) {
+        return addHandler(handler, SelectionEvent.getType());
+    }
+
+    /**
+     * Fire a selection event on the selected element
+     */
+    private void fireSelectionEvent() {
+        if (selected() != null)
+            SelectionEvent.fire(this, selected());
     }
 
     public static class GroupSelectList extends SelectableTable<Group> {

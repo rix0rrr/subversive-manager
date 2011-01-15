@@ -33,6 +33,13 @@ public class PermissionsList extends SelectableTable<PrincipalAccess> {
         getModel().add(new PrincipalAccess(principal, access));
     }
 
+    public boolean containsPrincipal(Principal principal) {
+        for (PrincipalAccess pa: getModel().all())
+            if (pa.principal.equals(principal))
+                return true;
+        return false;
+    }
+
     public void clear() {
         getModel().clear();
     }
