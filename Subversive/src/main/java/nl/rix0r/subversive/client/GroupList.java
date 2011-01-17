@@ -37,6 +37,7 @@ public class GroupList extends Composite implements
     @UiField TextBox searchField;
 
     private List<Group> baseGroups = new ArrayList<Group>();
+    private GroupDecorator decorator;
 
     public GroupList() {
         groups = new GroupSelectList();
@@ -92,6 +93,14 @@ public class GroupList extends Composite implements
         return addHandler(handler, OpenEvent.getType());
     }
 
+    public GroupDecorator getDecorator() {
+        return decorator;
+    }
+
+    public void setDecorator(GroupDecorator decorator) {
+        this.decorator = decorator;
+    }
+
     /**
      * Fire a selection event on the selected element
      */
@@ -100,7 +109,7 @@ public class GroupList extends Composite implements
             OpenEvent.fire(this, selected());
     }
 
-    public static class GroupSelectList extends SelectableTable<Group> {
+    public class GroupSelectList extends SelectableTable<Group> {
         public GroupSelectList() {
             getColumnFormatter().setWidth(0, "16px");
         }
@@ -114,7 +123,15 @@ public class GroupList extends Composite implements
         protected void renderRow(int i, Group element, Row row) {
             setWidget(i, 0, row.widgets.get("image"));
             setText(i, 1, element.toString());
+            if (decorator != null)
+                setText(i, 2, decorator.getModificationSummary(element));
         }
     }
 
+    /**
+     * Can be used to show additional information in the group list
+     */
+    public interface GroupDecorator {
+        public String getModificationSummary(Group group);
+    }
 }

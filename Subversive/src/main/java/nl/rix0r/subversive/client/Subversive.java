@@ -42,7 +42,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
         showLoginDialog();
     }
 
-    public void display(Widget screen) {
+    public static void display(Widget screen) {
         RootPanel.get("app").clear();
         RootPanel.get("app").add(errorLabel);
         RootPanel.get("app").add(screen);
@@ -126,7 +126,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
         dispatchOnToken(historyToken);
     }
 
-    private static void setError(String message) {
+    public static void setError(String message) {
         errorLabel.setText(message);
     }
 

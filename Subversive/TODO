@@ -2,7 +2,8 @@ CORE FEATURES
     - Group Edits
     - Add permissions for new directories
     - Definition of "owners"
-    - Loading and saving on server
+    - Loading and saving to server
+
 
 USABILITY
     - Retrieve directory information using the directory lister
@@ -12,10 +13,15 @@ USABILITY
     - Multiselect in lists
 
 
+ENHANCEMENTS
+    - Intelligent UserRetrieval caching on client
+
+
 AESTHETICS
     - Sorting of user/group lists
     - Add icons to directory tree
     - Styling (a logo!)
+    - Show group members preview in group list ("a, b and 3 more...")
 
 
 DEPLOYMENT

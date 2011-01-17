@@ -5,7 +5,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author rix0rrr
@@ -16,6 +18,7 @@ public class EditSession implements Serializable {
     private String repository;
     private Configuration baseConfiguration;
     private Configuration currentConfiguration;
+    private Map<Group, GroupModifications> modificationTable = new HashMap<Group, GroupModifications>();
 
     public EditSession(String repository, Configuration baseConfiguration) {
         this.repository = repository;
@@ -51,10 +54,41 @@ public class EditSession implements Serializable {
      * Found by applying all modifications to the base configuration.
      */
     private void updateCurrentConfiguration() {
+        modificationTable.clear();
+
         Configuration latest = baseConfiguration.copy();
-        for (Modification m: modifications)
+        for (Modification m: modifications) {
+            countGroupModification(m);
             m.apply(latest);
+        }
         currentConfiguration = latest;
+    }
+
+    /**
+     * Count the modification in the group table if it is a group modification
+     */
+    private void countGroupModification(Modification m) {
+        Group group = null;
+        boolean add = false;
+        if (m instanceof AddUserToGroup) {
+            group = ((AddUserToGroup)m).group();
+            add = true;
+        }
+        if (m instanceof RemoveUserFromGroup)
+            group = ((RemoveUserFromGroup)m).group();
+
+        if (group != null) {
+            if (!modificationTable.containsKey(group)) modificationTable.put(group, new GroupModifications());
+            if (add)
+                modificationTable.get(group).addition();
+            else
+                modificationTable.get(group).removal();
+        }
+    }
+
+    public GroupModifications groupModifications(Group group) {
+        if (!modificationTable.containsKey(group)) return new GroupModifications();
+        return modificationTable.get(group);
     }
 
     /**
@@ -80,6 +114,13 @@ public class EditSession implements Serializable {
     }
 
     /**
+     * Return the group definition for the given group
+     */
+    public GroupDefinition groupDefinition(Group group) {
+        return configuration().group(group);
+    }
+
+    /**
      * Return all permissions that apply to the given directory
      */
     public Collection<Permission> permissions(Directory directory) {
@@ -91,6 +132,11 @@ public class EditSession implements Serializable {
      */
     public void add(Modification modification) {
         modifications.add(modification);
+        updateCurrentConfiguration();
+    }
+
+    public void addAll(List<Modification> modifications) {
+        this.modifications.addAll(modifications);
         updateCurrentConfiguration();
     }
 
@@ -116,5 +162,29 @@ public class EditSession implements Serializable {
      */
     public List<Modification> modifications() {
         return Collections.unmodifiableList(modifications);
+    }
+
+    /**
+     * Class that represents the modifications to a single group
+     */
+    public static class GroupModifications {
+        private int additions = 0;
+        private int removals  = 0;
+
+        public void addition() {
+            additions++;
+        }
+
+        public void removal() {
+            removals++;
+        }
+
+        public int additions() {
+            return additions;
+        }
+
+        public int removals() {
+            return removals;
+        }
     }
 }

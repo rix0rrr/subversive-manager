@@ -1,0 +1,34 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+    xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:s='urn:import:nl.rix0r.subversive.client'>
+
+    <g:HTMLPanel>
+        <h2>Group Editor</h2>
+
+        <div>Group Name</div>
+        <g:TextBox ui:field="groupName" width="300px">New Group</g:TextBox>
+        <table valign="top">
+            <tr>
+                <td>
+                    In this group
+                    <g:DecoratorPanel>
+                        <s:UserList ui:field="groupUsers" width="250px" height="300px" />
+                    </g:DecoratorPanel>
+                </td>
+                <td valign="middle">
+                    <g:Button width="100%" ui:field="assignButton">&lt; Add</g:Button><br />
+                    <g:Button width="100%" ui:field="removeButton">Remove &gt;</g:Button>
+                </td>
+                <td>
+                    Available
+                    <g:DecoratorPanel>
+                        <s:UserList ui:field="allUsers" width="250px" height="300px" />
+                    </g:DecoratorPanel>
+                </td>
+            </tr>
+        </table>
+        <g:Button ui:field="saveButton">Save</g:Button>
+        <g:Button ui:field="cancelButton">Cancel</g:Button>
+    </g:HTMLPanel>
+</ui:UiBinder>

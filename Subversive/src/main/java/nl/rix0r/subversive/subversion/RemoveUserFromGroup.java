@@ -21,6 +21,10 @@ public class RemoveUserFromGroup implements Modification {
         g.removeUser(user);
     }
 
+    public Group group() {
+        return group;
+    }
+
     public String repository() {
         return group.repository();
     }

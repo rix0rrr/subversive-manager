@@ -19,11 +19,13 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
+import nl.rix0r.subversive.client.GroupList.GroupDecorator;
 import nl.rix0r.subversive.client.PermissionsList.PrincipalAccess;
 import nl.rix0r.subversive.subversion.Access;
 import nl.rix0r.subversive.subversion.Anonymous;
 import nl.rix0r.subversive.subversion.Directory;
 import nl.rix0r.subversive.subversion.EditSession;
+import nl.rix0r.subversive.subversion.EditSession.GroupModifications;
 import nl.rix0r.subversive.subversion.GrantPermission;
 import nl.rix0r.subversive.subversion.Group;
 import nl.rix0r.subversive.subversion.Permission;
@@ -57,11 +59,13 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     @UiField TabLayoutPanel tabpanel;
 
     private EditSession editSession;
+    private UserRetrievalServiceAsync userRetrieval;
 
     public EditorWindow(EditSession editSession, UserRetrievalServiceAsync userRetrieval) {
         initWidget(uiBinder.createAndBindUi(this));
         wireUp();
         setEditSession(editSession);
+        this.userRetrieval = userRetrieval;
         users.setUserRetrievalService(userRetrieval);
     }
 
@@ -74,6 +78,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         repoTitle.setText(editSession.repository());
         directoryTree.load(editSession.configuredDirectories());
         groups.setGroups(editSession.availableGroups());
+        groups.setDecorator(groupDecorator);
         refreshPermissions();
         refreshButtonStates();
     }
@@ -194,10 +199,14 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
 
     @UiHandler("newGroupButton")
     void newGroupClicked(ClickEvent e) {
+        newGroup();
     }
 
     @UiHandler("editGroupButton")
     void editGroupClicked(ClickEvent e) {
+        Group selected = groups.selected();
+        if (selected == null || selected.global()) return;
+        editGroup(selected);
     }
 
     @UiHandler("deleteGroupButton")
@@ -250,4 +259,52 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         editSession.add(new RemoveGroup(group));
         refresh();
     }
+
+    private void newGroup() {
+        final GroupEditor ge = new GroupEditor(userRetrieval);
+        ge.newGroup(editSession.repository());
+        ge.addCloseHandler(new CloseHandler<Boolean>() {
+            public void onClose(CloseEvent<Boolean> event) {
+                if (event.getTarget()) {
+                    editSession.addAll(ge.modifications());
+                    refresh();
+                }
+                Subversive.display(EditorWindow.this);
+            }
+        });
+        Subversive.display(ge);
+    }
+
+    private void editGroup(Group g) {
+        if (g == null) return;
+
+        final GroupEditor ge = new GroupEditor(userRetrieval);
+        ge.load(editSession.groupDefinition(g));
+        ge.addCloseHandler(new CloseHandler<Boolean>() {
+            public void onClose(CloseEvent<Boolean> event) {
+                if (event.getTarget()) {
+                    editSession.addAll(ge.modifications());
+                    refresh();
+                }
+                Subversive.display(EditorWindow.this);
+            }
+        });
+
+        Subversive.display(ge);
+    }
+
+    private GroupDecorator groupDecorator = new GroupDecorator() {
+        public String getModificationSummary(Group group) {
+            if (group == null) return "";
+            GroupModifications gm = editSession.groupModifications(group);
+
+            StringBuilder sb = new StringBuilder();
+            if (gm.additions() > 0) sb.append("+" + gm.additions());
+            if (gm.removals() > 0) {
+                if (sb.length() > 0) sb.append(", ");
+                sb.append("-" + gm.removals());
+            }
+            return sb.toString();
+        }
+    };
 }
