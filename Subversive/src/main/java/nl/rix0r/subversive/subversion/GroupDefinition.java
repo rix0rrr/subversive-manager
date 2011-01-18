@@ -13,8 +13,7 @@ public class GroupDefinition implements Serializable {
     private Group group;
     private Set<User> users = new HashSet<User>();
 
-    protected GroupDefinition() {
-    }
+    public GroupDefinition() { }
 
     public GroupDefinition(Group group) {
         this.group = group;

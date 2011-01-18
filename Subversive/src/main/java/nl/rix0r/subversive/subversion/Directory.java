@@ -18,6 +18,8 @@ public class Directory implements Comparable, Serializable {
         this.path       = makeAbsolute(noTrailingSlash(path));
     }
 
+    public Directory() { }
+
     public String repository() {
         return repository;
     }

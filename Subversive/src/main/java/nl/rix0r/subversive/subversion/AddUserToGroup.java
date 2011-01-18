@@ -8,6 +8,9 @@ public class AddUserToGroup implements Modification {
     private Group group;
     private User  user;
 
+    public AddUserToGroup() {
+    }
+
     public AddUserToGroup(User user, Group group) {
         this.group = group;
         this.user  = user;

@@ -2,6 +2,7 @@
 package nl.rix0r.subversive.client;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.History;
@@ -28,9 +29,9 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     private static Label errorLabel = new Label("");
 
     public Subversive() {
-        StubConfigEditor stub = new StubConfigEditor();
-        configEditor = stub;
-        userService = stub;
+        //StubConfigEditor stub = new StubConfigEditor();
+        configEditor = GWT.create(ConfigEditorService.class);
+        userService  = GWT.create(UserRetrievalService.class);
 
         errorLabel.setStyleName("gwt-errorMessage");
     }

@@ -8,6 +8,8 @@ public class RemoveUserFromGroup implements Modification {
     private Group group;
     private User  user;
 
+    public RemoveUserFromGroup() { }
+
     public RemoveUserFromGroup(User user, Group group) {
         this.group = group;
         this.user  = user;

@@ -8,6 +8,8 @@ package nl.rix0r.subversive.subversion;
 public class RevokePermission implements Modification {
     private Permission permission;
 
+    public RevokePermission() { }
+
     public RevokePermission(Permission permission) {
         this.permission = permission;
     }

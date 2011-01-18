@@ -26,6 +26,11 @@ public class Permission implements Comparable, Serializable {
         this(proto.directory(), proto.principal(), proto.access());
     }
 
+    /**
+     * Empty constructor for GWT/RPC
+     */
+    public Permission() { }
+
     public Access access() {
         return access;
     }

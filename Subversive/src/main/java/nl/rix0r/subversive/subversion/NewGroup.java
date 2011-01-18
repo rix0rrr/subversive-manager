@@ -9,6 +9,8 @@ package nl.rix0r.subversive.subversion;
 public class NewGroup implements Modification {
     private Group group;
 
+    public NewGroup() { }
+
     public NewGroup(Group group) {
         this.group = group;
     }

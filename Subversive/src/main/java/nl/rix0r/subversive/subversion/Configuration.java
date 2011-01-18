@@ -21,6 +21,8 @@ public class Configuration implements Serializable {
     private Map<Group, GroupDefinition> definitions = new HashMap<Group, GroupDefinition>();
     private HashSet<Permission>         permissions = new HashSet<Permission>();
 
+    public Configuration() { }
+
     public GroupDefinition group(Group group) {
         return definitions.get(group);
     }

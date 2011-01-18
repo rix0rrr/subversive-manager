@@ -9,6 +9,8 @@ package nl.rix0r.subversive.subversion;
 public class RemoveGroup implements Modification {
     private Group group;
 
+    public RemoveGroup() { }
+
     public RemoveGroup(Group group) {
         this.group = group;
     }

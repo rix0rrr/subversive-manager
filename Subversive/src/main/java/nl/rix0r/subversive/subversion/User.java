@@ -13,8 +13,7 @@ public class User implements Principal {
     private String username;
     private String fullName;
 
-    protected User() {
-    }
+    public User() { }
 
     public User(String username) {
         this.username = username;

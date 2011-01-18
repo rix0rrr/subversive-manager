@@ -8,6 +8,8 @@ package nl.rix0r.subversive.subversion;
 public class GrantPermission implements Modification {
     private Permission permission;
 
+    public GrantPermission() { }
+
     public GrantPermission(Permission permission) {
         this.permission = permission;
     }

@@ -29,7 +29,7 @@ public class EditSession implements Serializable {
     /**
      * Empty constructor for the benefit of GWT serialization
      */
-    protected EditSession() {
+    public EditSession() {
     }
 
     /**
@@ -167,7 +167,7 @@ public class EditSession implements Serializable {
     /**
      * Class that represents the modifications to a single group
      */
-    public static class GroupModifications {
+    public static class GroupModifications implements Serializable {
         private int additions = 0;
         private int removals  = 0;
 

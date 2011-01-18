@@ -13,8 +13,7 @@ public class Group implements Principal {
     private String repository;
     private String name;
 
-    protected Group() {
-    }
+    public Group() { }
 
     public Group(String name) {
         this.repository = "";
