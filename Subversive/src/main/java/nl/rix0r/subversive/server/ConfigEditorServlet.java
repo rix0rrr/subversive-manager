@@ -9,6 +9,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import nl.rix0r.subversive.client.ConfigEditorService;
@@ -48,9 +49,13 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
             DiskConfiguration config = new DiskConfiguration(configFile);
             config.load();
 
+            // We don't do permission validation live: otherwise we could
+            // never rename (remove and re-add) the Owners group. Instead,
+            // determine these things beforehand.
+            modifications = filterAllowedModifications(modifications, username, config, errors);
+
             for (Modification mod: modifications) {
                 try {
-                    verifyCanManage(username, mod.repository(), config);
                     mod.apply(config);
                 } catch (Exception ex) {
                     errors.add(ex.getMessage());
@@ -66,6 +71,22 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
             if (lock != null) try { lock.release(); } catch (IOException ex) { }
             if (channel != null) try { channel.close(); } catch (IOException ex) { }
         }
+    }
+
+    /**
+     * Remove the illegal modifications from the list, adding a notice to errors if so
+     */
+    private List<Modification> filterAllowedModifications(List<Modification> modifications, String username, Configuration config, List<String> errors) {
+        List<Modification> ret = new ArrayList<Modification>(modifications.size());
+        for (Modification mod: modifications) {
+            try {
+                verifyCanManage(username, mod.repository(), config);
+                ret.add(mod);
+            } catch (Exception ex) {
+                errors.add(ex.getMessage());
+            }
+        }
+        return ret;
     }
 
     public synchronized EditSession begin(String repository, String username, String password) throws ServiceException {
@@ -154,7 +175,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
      */
     private void verifyCanManage(String username, String repository, Configuration config) throws ServiceException {
         if (!canManage(username, repository, config))
-            throw new ServiceException(username + " is not allowed to manage " + repository + ". Sorry.");
+            throw new ServiceException("'" + username + "' is not allowed to manage the '" + repository + "' repository. Sorry.");
     }
 
     private boolean canManage(String username, String repository, Configuration config) throws ServiceException {

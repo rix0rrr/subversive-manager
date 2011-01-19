@@ -3,8 +3,6 @@ CORE FEATURES
 
 USABILITY
     - Retrieve directory information using the directory lister
-    - Change definition of (real) in directory tree from "existing" to "has permissions defined"
-      (therefore also refresh the directory tree when permissions changed)
     - Retrieve fullname of users already in the permissions list
     - Multiselect in lists
 
