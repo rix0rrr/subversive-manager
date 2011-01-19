@@ -9,7 +9,6 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import nl.rix0r.subversive.client.ConfigEditorService;
@@ -27,6 +26,7 @@ import nl.rix0r.subversive.subversion.User;
  */
 public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigEditorService, UserRetrievalService {
     private final static String propertiesFile = "subversive.properties";
+    private final static int invalidPasswordSleep = 2000;
 
     private Properties properties;
     private File configFile;
@@ -161,11 +161,17 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
     /**
      * Authenticate the given credentials
      *
-     * Throws an exception on failure.
+     * Throws an exception on failure. Additionally, sleep for a bit to avoid
+     * clients brute-forcing the password. Of course, this allows for a DoS
+     * but that's better than the alternative.
      */
     private void authenticate(String username, String password) throws ServiceException {
-        if (!userAuthority.authenticate(username, password))
+        if (!userAuthority.authenticate(username, password)) {
+            try {
+                Thread.sleep(invalidPasswordSleep);
+            } catch (InterruptedException ex) { }
             throw new ServiceException("Invalid username or password for user: " + username);
+        }
     }
 
     /**
