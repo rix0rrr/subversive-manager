@@ -59,10 +59,10 @@ public class Group implements Principal {
             return false;
         }
         final Group other = (Group) obj;
-        if ((this.repository == null) ? (other.repository != null) : !this.repository.equals(other.repository)) {
+        if ((this.repository == null) ? (other.repository != null) : !this.repository.toLowerCase().equals(other.repository.toLowerCase())) {
             return false;
         }
-        if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
+        if ((this.name == null) ? (other.name != null) : !this.name.toLowerCase().equals(other.name.toLowerCase())) {
             return false;
         }
         return true;
@@ -71,8 +71,8 @@ public class Group implements Principal {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 97 * hash + (this.repository != null ? this.repository.hashCode() : 0);
-        hash = 97 * hash + (this.name != null ? this.name.hashCode() : 0);
+        hash = 97 * hash + (this.repository != null ? this.repository.toLowerCase().hashCode() : 0);
+        hash = 97 * hash + (this.name != null ? this.name.toLowerCase().hashCode() : 0);
         return hash;
     }
 }

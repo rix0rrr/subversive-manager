@@ -47,7 +47,7 @@ public class User implements Principal {
             return false;
         }
         final User other = (User) obj;
-        if ((this.username == null) ? (other.username != null) : !this.username.equals(other.username)) {
+        if ((this.username == null) ? (other.username != null) : !this.username.toLowerCase().equals(other.username.toLowerCase())) {
             return false;
         }
         return true;
@@ -56,7 +56,7 @@ public class User implements Principal {
     @Override
     public int hashCode() {
         int hash = 5;
-        hash = 19 * hash + (this.username != null ? this.username.hashCode() : 0);
+        hash = 19 * hash + (this.username != null ? this.username.toLowerCase().hashCode() : 0);
         return hash;
     }
 

@@ -1,4 +1,3 @@
-
 package nl.rix0r.subversive.client;
 
 import com.google.gwt.core.client.EntryPoint;

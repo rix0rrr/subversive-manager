@@ -14,7 +14,10 @@ import java.util.Properties;
 import nl.rix0r.subversive.client.ConfigEditorService;
 import nl.rix0r.subversive.client.ServiceException;
 import nl.rix0r.subversive.client.UserRetrievalService;
+import nl.rix0r.subversive.subversion.Configuration;
 import nl.rix0r.subversive.subversion.EditSession;
+import nl.rix0r.subversive.subversion.Group;
+import nl.rix0r.subversive.subversion.GroupDefinition;
 import nl.rix0r.subversive.subversion.Modification;
 import nl.rix0r.subversive.subversion.User;
 
@@ -47,7 +50,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
 
             for (Modification mod: modifications) {
                 try {
-                    verifyCanManage(username, mod.repository());
+                    verifyCanManage(username, mod.repository(), config);
                     mod.apply(config);
                 } catch (Exception ex) {
                     errors.add(ex.getMessage());
@@ -69,10 +72,11 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
         try {
             initialize();
             authenticate(username, password);
-            verifyCanManage(username, repository);
 
             DiskConfiguration config = new DiskConfiguration(configFile);
             config.load();
+
+            verifyCanManage(username, repository, config);
 
             return new EditSession(repository, config.subset(repository));
         } catch (Exception ex) {
@@ -85,12 +89,19 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
         initialize();
         authenticate(username, password);
 
-        List<String> ret = new ArrayList<String>();
-        for (String repo: repositoryLister.allRepositories())
-            if (canManage(username, repo))
-                ret.add(repo);
+        try {
+            DiskConfiguration config = new DiskConfiguration(configFile);
+            config.load();
 
-        return ret;
+            List<String> ret = new ArrayList<String>();
+            for (String repo: repositoryLister.allRepositories())
+                if (canManage(username, repo, config))
+                    ret.add(repo);
+
+            return ret;
+        } catch (IOException ex) {
+            throw new ServiceException(ex);
+        }
     }
 
     public List<User> findUsers(String like) throws ServiceException {
@@ -141,13 +152,42 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
      *
      * Throws an exception if not.
      */
-    private void verifyCanManage(String username, String repository) throws ServiceException {
-        if (!canManage(username, repository))
+    private void verifyCanManage(String username, String repository, Configuration config) throws ServiceException {
+        if (!canManage(username, repository, config))
             throw new ServiceException(username + " is not allowed to manage " + repository + ". Sorry.");
     }
 
-    private boolean canManage(String username, String repository) {
-        return true;
+    private boolean canManage(String username, String repository, Configuration config) throws ServiceException {
+        return isAdmin(username, config) || isOwner(username, repository, config);
+    }
+
+    /**
+     * Returns whether the user is admin
+     *
+     * I.e., if there is a group marked as admin group, whether the user is
+     * a member of this group.
+     */
+    private boolean isAdmin(String username, Configuration config) throws ServiceException {
+        loadProperties();
+
+        String adminGroupName = properties.getProperty("subversive.admingroup");
+        if (adminGroupName == null) return false;
+
+        return memberOf(username, new Group(adminGroupName), config);
+    }
+
+    private boolean isOwner(String username, String repository, Configuration config) throws ServiceException {
+        loadProperties();
+
+        String ownerGroupName = properties.getProperty("subversive.ownergroup");
+        if (ownerGroupName == null) return false;
+
+        return memberOf(username, new Group(repository, ownerGroupName), config);
+    }
+
+    private boolean memberOf(String username, Group group, Configuration config) {
+        GroupDefinition gd = config.group(group);
+        return gd != null && gd.users().contains(new User(username));
     }
 
     /**
