@@ -26,7 +26,7 @@ public class RepositoryLister {
         List<String> ret = new ArrayList<String>(dirs.length);
 
         for (String dir: dirs)
-            if (!dir.startsWith(".") && new File(directory, dir).isDirectory())
+            if (!dir.startsWith(".") && new File(directory, dir).isDirectory() && new File(new File(directory, dir), "format").exists())
                 ret.add(dir);
 
         return ret;
