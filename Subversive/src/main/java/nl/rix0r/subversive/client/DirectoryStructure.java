@@ -50,6 +50,11 @@ public class DirectoryStructure {
                 throw new RuntimeException("All directories must be in the same repository. Expected " + root.directory.repository() + ", got " + directory.repository());
     }
 
+    public Directory root() {
+        if (root == null) return null;
+        return root.directory();
+    }
+
     public void walk(DirWalker<?> walker) {
         if (root != null)
             root.visit(null, walker);

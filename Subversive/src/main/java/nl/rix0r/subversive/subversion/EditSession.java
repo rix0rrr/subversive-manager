@@ -6,24 +6,27 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author rix0rrr
  */
 public class EditSession implements Serializable {
     private List<Modification> modifications = new ArrayList<Modification>();
-
     private String repository;
     private Configuration baseConfiguration;
-    private Configuration currentConfiguration;
-    private Map<Group, GroupModifications> modificationTable = new HashMap<Group, GroupModifications>();
+
+    // The following fields are only for in-memory bookkeeping
+    transient private Configuration currentConfiguration;
+    transient private Map<Group, GroupModifications> modificationTable = new HashMap<Group, GroupModifications>();
+    transient private Set<Directory> assignedDirectories = new HashSet<Directory>();
 
     public EditSession(String repository, Configuration baseConfiguration) {
-        this.repository = repository;
+        this.repository        = repository;
         this.baseConfiguration = baseConfiguration;
-        this.currentConfiguration = baseConfiguration;
     }
 
     /**
@@ -45,6 +48,7 @@ public class EditSession implements Serializable {
      * This configuration has all modifications applied
      */
     public Configuration configuration() {
+        if (currentConfiguration == null) updateCurrentConfiguration(); // First time
         return currentConfiguration;
     }
 
@@ -52,6 +56,7 @@ public class EditSession implements Serializable {
      * Updates the current configuration
      *
      * Found by applying all modifications to the base configuration.
+     * Also calculates some stats that we show in the EditorWindow.
      */
     private void updateCurrentConfiguration() {
         modificationTable.clear();
@@ -62,6 +67,21 @@ public class EditSession implements Serializable {
             m.apply(latest);
         }
         currentConfiguration = latest;
+
+        detectAssignedDirectories();
+    }
+
+    /**
+     * Add all directories that have permissions to a set for visualization purposes
+     */
+    private void detectAssignedDirectories() {
+        assignedDirectories.clear();
+        for (Permission p: currentConfiguration.permissions(null, null))
+            assignedDirectories.add(p.directory());
+    }
+
+    public boolean directoryAssigned(Directory directory) {
+        return assignedDirectories.contains(directory);
     }
 
     /**

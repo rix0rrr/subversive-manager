@@ -18,7 +18,9 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
+import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
+import nl.rix0r.subversive.client.DirectoryTree.DirectoryDecorator;
 import nl.rix0r.subversive.client.GroupList.GroupDecorator;
 import nl.rix0r.subversive.client.PermissionsList.PrincipalAccess;
 import nl.rix0r.subversive.subversion.Access;
@@ -64,9 +66,12 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     public EditorWindow(EditSession editSession, UserRetrievalServiceAsync userRetrieval) {
         initWidget(uiBinder.createAndBindUi(this));
         wireUp();
-        setEditSession(editSession);
         this.userRetrieval = userRetrieval;
         users.setUserRetrievalService(userRetrieval);
+        groups.setDecorator(groupDecorator);
+        directoryTree.setDecorator(directoryDecorator);
+
+        setEditSession(editSession);
     }
 
     public void setEditSession(EditSession editSession) {
@@ -75,10 +80,9 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     }
 
     public void refresh() {
-        repoTitle.setText(editSession.repository());
         directoryTree.load(editSession.configuredDirectories());
+        repoTitle.setText(editSession.repository());
         groups.setGroups(editSession.availableGroups());
-        groups.setDecorator(groupDecorator);
         refreshPermissions();
         refreshButtonStates();
     }
@@ -120,7 +124,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     private void wireUp() {
         directoryTree.addSelectionHandler(new SelectionHandler<Directory>() {
             public void onSelection(SelectionEvent<Directory> event) {
-                refreshPermissions();
+                refresh();
             }
         });
     }
@@ -305,6 +309,13 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
                 sb.append("-" + gm.removals());
             }
             return sb.toString();
+        }
+    };
+
+    private DirectoryDecorator directoryDecorator = new DirectoryDecorator() {
+        public void decorateDirectoryNode(Directory directory, TreeItem ti) {
+            if (editSession.directoryAssigned(directory))
+                ti.setText(ti.getText() + " (*)");
         }
     };
 }

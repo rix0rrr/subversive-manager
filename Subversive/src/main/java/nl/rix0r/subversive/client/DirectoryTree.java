@@ -1,12 +1,14 @@
 package nl.rix0r.subversive.client;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Tree;
@@ -27,14 +29,31 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
     @UiField Tree tree;
     @UiField TextBox customDirField;
 
+    private DirectoryStructure directoryStructure = new DirectoryStructure();
+    private DirectoryDecorator decorator;
+    private Directory selectedDirectory;
+
     public DirectoryTree() {
         initWidget(uiBinder.createAndBindUi(this));
         tree.setAnimationEnabled(true);
         tree.addSelectionHandler(new SelectionHandler<TreeItem>() {
             public void onSelection(SelectionEvent<TreeItem> event) {
-                fireSelected();
+                selectionChanged(directoryFromTreeItem(event.getSelectedItem()));
             }
         });
+    }
+
+    private Directory directoryFromTreeItem(TreeItem ti) {
+        if (ti == null) return null;
+        return (Directory)ti.getUserObject();
+    }
+
+    public DirectoryDecorator getDecorator() {
+        return decorator;
+    }
+
+    public void setDecorator(DirectoryDecorator decorator) {
+        this.decorator = decorator;
     }
 
     public HandlerRegistration addSelectionHandler(SelectionHandler<Directory> handler) {
@@ -42,15 +61,15 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
     }
 
     public Directory selected() {
-        TreeItem selected = tree.getSelectedItem();
-        return selected == null ? null : (Directory)selected.getUserObject();
+        return selectedDirectory;
     }
 
     /**
      * Fire the currently selected directory as an event
      */
-    private void fireSelected() {
-        SelectionEvent.fire(this, selected());
+    private void selectionChanged(Directory newSelected) {
+        selectedDirectory = newSelected;
+        SelectionEvent.fire(this, selectedDirectory);
     }
 
     /**
@@ -58,29 +77,45 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
      * directories that are not actually in the given set
      */
     public void load(List<Directory> directories) {
-        tree.clear();
+        directoryStructure.add(directories);
+        refresh();
+    }
 
-        DirectoryStructure ds = new DirectoryStructure();
-        ds.add(directories);
-        ds.walk(new DirWalker<TreeItem>() {
+    public void add(Directory directory) {
+        directoryStructure.add(directory);
+        refresh();
+    }
+
+    private TreeItem treeItemToSelect;
+
+    public void refresh() {
+        tree.clear();
+        treeItemToSelect = null;
+        directoryStructure.walk(new DirWalker<TreeItem>() {
             public TreeItem walk(TreeItem parent, Dir child) {
                 String name = child.directory().lastSegment();
                 if (name.equals("/")) name = "root (/)";
-                if (child.real()) name += " (r)";
 
                 TreeItem ti = parent == null ? tree.addItem(name) : parent.addItem(name);
                 ti.setUserObject(child.directory());
 
+                if (decorator != null) decorator.decorateDirectoryNode(child.directory(), ti);
+                if (child.directory().equals(selectedDirectory)) treeItemToSelect = ti;
                 return ti;
             }
         });
 
         expandAll();
 
-        // Select the root
-        if (tree.getItemCount() > 0) {
-            tree.setSelectedItem(tree.getItem(0));
+        // Either select the root (without firing an event)
+        // or reselect the previously selected directory.
+        if (treeItemToSelect == null && tree.getItemCount() > 0) {
+            treeItemToSelect = tree.getItem(0);
+            selectedDirectory = directoryFromTreeItem(treeItemToSelect);
         }
+
+        if (treeItemToSelect != null)
+            tree.setSelectedItem(treeItemToSelect, false);
     }
 
     public void expandAll() {
@@ -92,5 +127,28 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
         ti.setState(true);
         for (int i = 0; i < ti.getChildCount(); i++)
             expand(ti.getChild(i));
+    }
+
+    private void injectDirectory(String path) {
+        Directory base = directoryStructure.root();
+        if (base == null) return;
+
+        add(new Directory(base.repository(), path));
+    }
+
+    @UiHandler("customDirField")
+    void onCustomDirKey(KeyUpEvent e) {
+        if (e.getNativeKeyCode() == 13) {
+            injectDirectory(sanitizeDirectory(customDirField.getText()));
+            customDirField.setText("");
+        }
+    }
+
+    private String sanitizeDirectory(String dir) {
+        return dir.trim().replace("\\", "/");
+    }
+
+    public interface DirectoryDecorator {
+        public void decorateDirectoryNode(Directory directory, TreeItem ti);
     }
 }
