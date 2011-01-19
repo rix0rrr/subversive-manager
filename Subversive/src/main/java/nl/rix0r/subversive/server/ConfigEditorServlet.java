@@ -39,8 +39,8 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
         List<String> errors = new ArrayList<String>();
         try {
             // Acquire lock on the file
-            //channel = new RandomAccessFile(configFile, "rw").getChannel();
-            //lock    = channel.lock();
+            channel = new RandomAccessFile(configFile, "rw").getChannel();
+            lock    = channel.lock();
 
             DiskConfiguration config = new DiskConfiguration(configFile);
             config.load();
@@ -54,7 +54,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
                 }
             }
 
-            //config.save();
+            config.save();
 
             return errors;
         } catch (IOException ex) {

@@ -11,9 +11,11 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
 import java.util.List;
 import nl.rix0r.subversive.client.LoginDialog.LoginHandler;
 import nl.rix0r.subversive.subversion.EditSession;
+import nl.rix0r.subversive.subversion.Modification;
 
 /**
  *
@@ -97,7 +99,9 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
             return;
         }
 
-        configEditor.apply(session.modifications(), username, password, new Callback<List<String>>() {
+        // Have to make a copy: the UnmodifiableList is not serializable
+        List<Modification> mods = new ArrayList<Modification>(session.modifications());
+        configEditor.apply(mods, username, password, new Callback<List<String>>() {
             public void onSuccess(List<String> result) {
                 ResultDialog rd = new ResultDialog();
                 rd.setMessages(result);
@@ -133,6 +137,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
 
     abstract public static class Callback<T> implements AsyncCallback<T> {
         public void onFailure(Throwable caught) {
+            GWT.log(caught.getMessage(), caught);
             setError(caught.getMessage());
         }
     }

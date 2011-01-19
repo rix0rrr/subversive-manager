@@ -1,7 +1,6 @@
 CORE FEATURES
     - Add permissions for new directories
     - Definition of "owners"
-    - Loading and saving to server
 
 
 USABILITY
@@ -22,6 +21,7 @@ AESTHETICS
     - Add icons to directory tree
     - Styling (a logo!)
     - Show group members preview in group list ("a, b and 3 more...")
+    - Favicon
 
 
 DEPLOYMENT
