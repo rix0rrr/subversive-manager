@@ -12,8 +12,8 @@ import nl.rix0r.subversive.subversion.User;
  */
 public class IconProvider {
     public static Image principal(Principal principal) {
-        if (principal instanceof User) return new Image("subversive/user.png");
-        if (principal instanceof Group) return new Image("subversive/group.png");
-        return new Image("subversive/anonymous.png");
+        if (principal instanceof User) return new Image(Resources.The.userImage());
+        if (principal instanceof Group) return new Image(Resources.The.groupImage());
+        return new Image(Resources.The.anonymousImage());
     }
 }

@@ -16,7 +16,11 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
@@ -40,7 +44,6 @@ import nl.rix0r.subversive.subversion.User;
  * @author rix0rrr
  */
 public class EditorWindow extends Composite implements HasCloseHandlers<EditSession> {
-
     interface MyUiBinder extends UiBinder<Widget, EditorWindow> { };
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
@@ -93,6 +96,8 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
      * Call this if you know nothing else has changed.
      */
     private void refreshButtonStates() {
+        if (editSession == null) return;
+
         undoButton.setEnabled(editSession.canUndo());
         assignButton.setEnabled(
                 (tabpanel.getSelectedIndex() == 0 && users.selected() != null && !permissions.containsPrincipal(users.selected()))
@@ -314,8 +319,14 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
 
     private DirectoryDecorator directoryDecorator = new DirectoryDecorator() {
         public void decorateDirectoryNode(Directory directory, TreeItem ti) {
+            Panel p = new FlowPanel();
+            p.setStyleName("gwt-treeRow");
             if (editSession.directoryAssigned(directory))
-                ti.setText(ti.getText() + " (*)");
+                p.add(new Image(Resources.The.folderImage()));
+            else
+                p.add(new Image(Resources.The.noFolderImage()));
+            p.add(new InlineLabel(ti.getText()));
+            ti.setWidget(p);
         }
     };
 }

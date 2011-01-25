@@ -30,9 +30,11 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     private static Label errorLabel = new Label("");
 
     public Subversive() {
-        //StubConfigEditor stub = new StubConfigEditor();
-        configEditor = GWT.create(ConfigEditorService.class);
-        userService  = GWT.create(UserRetrievalService.class);
+        StubConfigEditor stub = new StubConfigEditor();
+        //configEditor = GWT.create(ConfigEditorService.class);
+        //userService  = GWT.create(UserRetrievalService.class);
+        configEditor = stub;
+        userService = stub;
 
         errorLabel.setStyleName("gwt-errorMessage");
     }

@@ -1,6 +1,11 @@
-.selected {
+.selected, .gwt-TreeItem-selected .gwt-treeRow {
     background: #dbeaff;
     color: #002569;
+}
+
+.gwt-treeRow img {
+    vertical-align: baseline;
+    margin-right: 3px;
 }
 
 .gwt-TextBox-hint {
