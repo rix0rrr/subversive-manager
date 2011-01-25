@@ -38,7 +38,7 @@ public class ResultDialog extends Composite implements HasCloseHandlers<Void> {
 
     public void setMessages(List<String> msgs) {
         summary.setText(msgs.isEmpty()
-                ? "Your modifications have been applied succesfully."
+                ? "Your modifications have been succesfully applied."
                 : "There were problems applying (some of) your modifications. See below for details.");
 
         messages.clear();
