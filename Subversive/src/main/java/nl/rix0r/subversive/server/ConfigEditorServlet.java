@@ -15,6 +15,7 @@ import nl.rix0r.subversive.client.ConfigEditorService;
 import nl.rix0r.subversive.client.ServiceException;
 import nl.rix0r.subversive.client.UserRetrievalService;
 import nl.rix0r.subversive.subversion.Configuration;
+import nl.rix0r.subversive.subversion.Directory;
 import nl.rix0r.subversive.subversion.EditSession;
 import nl.rix0r.subversive.subversion.Group;
 import nl.rix0r.subversive.subversion.GroupDefinition;
@@ -100,6 +101,22 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
             verifyCanManage(username, repository, config);
 
             return new EditSession(repository, config.subset(repository));
+        } catch (Exception ex) {
+            throw new ServiceException(ex);
+        }
+    }
+
+    public List<Directory> listDirectories(String repository, String username, String password) throws ServiceException {
+        try {
+            initialize();
+            authenticate(username, password);
+
+            DiskConfiguration config = new DiskConfiguration(configFile);
+            config.load();
+
+            verifyCanManage(username, repository, config);
+
+            return repositoryLister.listDirectories(repository);
         } catch (Exception ex) {
             throw new ServiceException(ex);
         }
@@ -261,4 +278,5 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
             throw new ServiceException(ex);
         }
     }
+
 }

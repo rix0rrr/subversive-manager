@@ -4,6 +4,7 @@ package nl.rix0r.subversive.client;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import java.util.List;
+import nl.rix0r.subversive.subversion.Directory;
 import nl.rix0r.subversive.subversion.EditSession;
 import nl.rix0r.subversive.subversion.Modification;
 
@@ -31,4 +32,9 @@ public interface ConfigEditorService extends RemoteService {
      * Find all repository that can be managed by the given user
      */
     public List<String> myRepositories(String username, String password) throws ServiceException;
+
+    /**
+     * Return a list of all directories in the given repository
+     */
+    public List<Directory> listDirectories(String repository, String username, String password) throws ServiceException;
 }

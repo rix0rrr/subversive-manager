@@ -32,6 +32,7 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
     private DirectoryStructure directoryStructure = new DirectoryStructure();
     private DirectoryDecorator decorator;
     private Directory selectedDirectory;
+    private String repository;
 
     public DirectoryTree() {
         initWidget(uiBinder.createAndBindUi(this));
@@ -41,6 +42,12 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
                 selectionChanged(directoryFromTreeItem(event.getSelectedItem()));
             }
         });
+    }
+
+    public void setRepository(String repository) {
+        directoryStructure.clear();
+        this.repository = repository;
+        directoryStructure.add(new Directory(repository, "/"));
     }
 
     private Directory directoryFromTreeItem(TreeItem ti) {
@@ -76,7 +83,7 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
      * Load this tree from the given list of directories, inferring
      * directories that are not actually in the given set
      */
-    public void load(List<Directory> directories) {
+    public void add(List<Directory> directories) {
         directoryStructure.add(directories);
         refresh();
     }

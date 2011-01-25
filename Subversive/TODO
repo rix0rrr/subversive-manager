@@ -5,6 +5,10 @@ USABILITY
     - Retrieve directory information using the directory lister
     - Retrieve fullname of users already in the permissions list
     - Multiselect in lists
+    - Editable configuration from front-end
+    - Remember which directories are expanded. Only auto-expand the directories
+      that have SET permissions under them.
+    - Refresh of the directory tree is too slow (and the visual jumping is jarring)
 
 
 ENHANCEMENTS
@@ -14,7 +18,8 @@ ENHANCEMENTS
 
 AESTHETICS
     - Show group members preview in group list ("a, b and 3 more...")
-    - Styling (a logo!)
+    - Styling 
+    - A logo!
     - Favicon
 
 

@@ -39,6 +39,10 @@ public class DirectoryStructure {
         root.add(rootPath, 1).real(true);
     }
 
+    public void clear() {
+        root = null;
+    }
+
     /**
      * Ensure that we have a root node, create one if necessary
      *

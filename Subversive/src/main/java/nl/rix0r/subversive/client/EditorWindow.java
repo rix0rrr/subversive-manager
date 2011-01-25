@@ -14,6 +14,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -24,6 +25,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
+import java.util.List;
 import nl.rix0r.subversive.client.DirectoryTree.DirectoryDecorator;
 import nl.rix0r.subversive.client.GroupList.GroupDecorator;
 import nl.rix0r.subversive.client.PermissionsList.PrincipalAccess;
@@ -79,11 +81,12 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
 
     public void setEditSession(EditSession editSession) {
         this.editSession = editSession;
+        directoryTree.setRepository(editSession.repository());
         refresh();
     }
 
     public void refresh() {
-        directoryTree.load(editSession.configuredDirectories());
+        directoryTree.add(editSession.configuredDirectories());
         repoTitle.setText(editSession.repository());
         groups.setGroups(editSession.availableGroups());
         refreshPermissions();
@@ -136,6 +139,14 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
 
     public HandlerRegistration addCloseHandler(CloseHandler<EditSession> handler) {
         return addHandler(handler, CloseEvent.getType());
+    }
+
+    public void directoryRetrievalFailed(String errorMessage) {
+        Window.alert(errorMessage);
+    }
+
+    public void directoriesRetrieved(List<Directory> directories) {
+        directoryTree.add(directories);
     }
 
     private void editingDone() {

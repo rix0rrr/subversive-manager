@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import nl.rix0r.subversive.subversion.Access;
 import nl.rix0r.subversive.subversion.Configuration;
+import nl.rix0r.subversive.subversion.Directory;
 import nl.rix0r.subversive.subversion.EditSession;
 import nl.rix0r.subversive.subversion.Group;
 import nl.rix0r.subversive.subversion.Modification;
@@ -130,5 +131,9 @@ public class StubConfigEditor implements ConfigEditorServiceAsync, UserRetrieval
         if (canManageRepository(username, repository)) return true;
         onFail.onFailure(new ServiceException("You're not allowed to manage repository " + username + ". Sorry."));
         return false;
+    }
+
+    public void listDirectories(String repository, String username, String password, AsyncCallback<List<Directory>> asyncCallback) {
+        asyncCallback.onSuccess(new ArrayList<Directory>());
     }
 }

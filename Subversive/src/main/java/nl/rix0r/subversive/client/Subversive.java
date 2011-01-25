@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
 import java.util.ArrayList;
 import java.util.List;
 import nl.rix0r.subversive.client.LoginDialog.LoginHandler;
+import nl.rix0r.subversive.subversion.Directory;
 import nl.rix0r.subversive.subversion.EditSession;
 import nl.rix0r.subversive.subversion.Modification;
 
@@ -30,11 +31,11 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     private static Label errorLabel = new Label("");
 
     public Subversive() {
-        StubConfigEditor stub = new StubConfigEditor();
-        //configEditor = GWT.create(ConfigEditorService.class);
-        //userService  = GWT.create(UserRetrievalService.class);
-        configEditor = stub;
-        userService = stub;
+        configEditor = GWT.create(ConfigEditorService.class);
+        userService  = GWT.create(UserRetrievalService.class);
+        //StubConfigEditor stub = new StubConfigEditor();
+        //configEditor = stub;
+        //userService = stub;
 
         errorLabel.setStyleName("gwt-errorMessage");
     }
@@ -73,11 +74,11 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
         });
     }
 
-    private void openEditor(String repository) {
+    private void openEditor(final String repository) {
         setError("");
         configEditor.begin(repository, username, password, new Callback<EditSession>() {
             public void onSuccess(EditSession result) {
-                EditorWindow ew = new EditorWindow(result, userService);
+                final EditorWindow ew = new EditorWindow(result, userService);
                 ew.addCloseHandler(new CloseHandler<EditSession>() {
                     public void onClose(CloseEvent<EditSession> event) {
                         commitSession(event.getTarget());
@@ -85,6 +86,17 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
                 });
 
                 display(ew);
+
+                // Start loading directories, forward to editor when retrieved
+                configEditor.listDirectories(repository, username, password, new AsyncCallback<List<Directory>>() {
+                    public void onFailure(Throwable caught) {
+                        ew.directoryRetrievalFailed(caught.getMessage());
+                    }
+
+                    public void onSuccess(List<Directory> result) {
+                        ew.directoriesRetrieved(result);
+                    }
+                });
             }
         });
     }
