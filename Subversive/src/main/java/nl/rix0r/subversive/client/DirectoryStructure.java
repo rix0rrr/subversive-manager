@@ -19,24 +19,31 @@ public class DirectoryStructure {
      * Add the given list of directories into the structure
      *
      * All directories must be in the same repository.
+     *
+     * Returns whether a new directory was effectively added.
      */
-    public void add(List<Directory> directories) {
+    public boolean add(List<Directory> directories) {
+        boolean change = false;
         for (Directory directory: directories)
-            add(directory);
+            change |= add(directory);
+        return change;
     }
 
     /**
      * Add the given directory into the structure
      *
      * All directories must be in the same repository.
+     *
+     * Returns whether a new directory was effectively added.
      */
-    public void add(Directory directory) {
-        ensureRoot(directory);
+    public boolean add(Directory directory) {
+        boolean change = ensureRoot(directory);
 
         List<Directory> rootPath = new ArrayList<Directory>();
         directory.addRootPath(rootPath);
 
-        root.add(rootPath, 1).real(true);
+        change |= root.add(rootPath, 1);
+        return change;
     }
 
     public void clear() {
@@ -48,10 +55,12 @@ public class DirectoryStructure {
      *
      * Also verifies whether the repositories match
      */
-    private void ensureRoot(Directory directory) {
+    private boolean ensureRoot(Directory directory) {
+        boolean change = root == null;
         if (root == null) root = new Dir(new Directory(directory.repository(), "/")).real(true);
         if (!directory.repository().equals(root.directory.repository()))
                 throw new RuntimeException("All directories must be in the same repository. Expected " + root.directory.repository() + ", got " + directory.repository());
+        return change;
     }
 
     public Directory root() {
@@ -98,13 +107,18 @@ public class DirectoryStructure {
          * already exists, processing is continued. The directory that is finally
          * inserted is returned.
          */
-        public Dir add(List<Directory> directories, int i) {
-            if (i == directories.size()) return this;
+        public boolean add(List<Directory> directories, int i) {
+            if (i == directories.size()) return false;
 
+            boolean change = false;
             Directory child = directories.get(i);
-            if (!children.containsKey(child)) children.put(child, new Dir(child));
+            if (!children.containsKey(child)) {
+                children.put(child, new Dir(child));
+                change = true;
+            }
 
-            return children.get(child).add(directories, i + 1);
+            change |= children.get(child).add(directories, i + 1);
+            return change;
         }
 
         public <T> void visit(T parentValue, DirWalker<T> walker) {

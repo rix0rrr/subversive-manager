@@ -11,13 +11,13 @@
                 <td>
                     Directories
                     <g:DecoratorPanel>
-                        <s:DirectoryTree width="200px" height="400px" ui:field="directoryTree" />
+                        <s:DirectoryTree width="300px" height="400px" ui:field="directoryTree" />
                     </g:DecoratorPanel>
                 </td>
                 <td>
                     <g:Label ui:field="selectedDirectory" />
                     <g:DecoratorPanel>
-                        <g:ScrollPanel width="300px" height="400px">
+                        <g:ScrollPanel width="250px" height="400px">
                             <s:PermissionsList ui:field="permissions" width="100%" />
                         </g:ScrollPanel>
                     </g:DecoratorPanel>
