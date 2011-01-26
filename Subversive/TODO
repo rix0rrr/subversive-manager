@@ -5,10 +5,6 @@ USABILITY
     - Retrieve fullname of users already in the permissions list
     - Multiselect in lists
     - Editable configuration from front-end
-    - Remember which directories are expanded. Only auto-expand the directories
-      that have SET permissions under them.
-    - Refresh of the directory tree is too slow (and the visual jumping is jarring)
-
 
 ENHANCEMENTS
     - Intelligent UserRetrieval caching on client

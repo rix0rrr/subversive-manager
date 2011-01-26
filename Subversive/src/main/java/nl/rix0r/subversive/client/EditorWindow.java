@@ -86,7 +86,9 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     }
 
     public void refresh() {
-        directoryTree.add(editSession.configuredDirectories());
+        List<Directory> configuredDirectories = editSession.configuredDirectories();
+        directoryTree.add(configuredDirectories);
+        directoryTree.makeVisible(configuredDirectories);
         repoTitle.setText(editSession.repository());
         groups.setGroups(editSession.availableGroups());
         refreshPermissions();
@@ -319,10 +321,10 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
             GroupModifications gm = editSession.groupModifications(group);
 
             StringBuilder sb = new StringBuilder();
-            if (gm.additions() > 0) sb.append("+" + gm.additions());
+            if (gm.additions() > 0) sb.append("+").append(gm.additions());
             if (gm.removals() > 0) {
                 if (sb.length() > 0) sb.append(", ");
-                sb.append("-" + gm.removals());
+                sb.append("-").append(gm.removals());
             }
             return sb.toString();
         }

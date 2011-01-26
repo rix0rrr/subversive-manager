@@ -2,7 +2,11 @@ package nl.rix0r.subversive.client;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -14,7 +18,11 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import nl.rix0r.subversive.client.DirectoryStructure.Dir;
 import nl.rix0r.subversive.client.DirectoryStructure.DirWalker;
 import nl.rix0r.subversive.subversion.Directory;
@@ -22,7 +30,9 @@ import nl.rix0r.subversive.subversion.Directory;
 /**
  * @author rix0rrr
  */
-public class DirectoryTree extends Composite implements HasSelectionHandlers<Directory> {
+public class DirectoryTree extends Composite implements
+        HasSelectionHandlers<Directory>, OpenHandler<TreeItem>, CloseHandler<TreeItem> {
+
     interface MyUiBinder extends UiBinder<Widget, DirectoryTree> { };
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
@@ -34,14 +44,33 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
     private Directory selectedDirectory;
     private String repository;
 
+    /**
+     * Directories of nodes that should be expanded
+     * 
+     * Persistent between refreshes.
+     */
+    private Set<Directory> expandedDirs = new HashSet<Directory>();
+
+    /**
+     * A mapping of directories to the nodes that visualize them
+     */
+    private Map<Directory, TreeItem> whichNode = new HashMap<Directory, TreeItem>();
+
     public DirectoryTree() {
         initWidget(uiBinder.createAndBindUi(this));
         tree.setAnimationEnabled(true);
+
+        // Fire an event when the user selects a directory
         tree.addSelectionHandler(new SelectionHandler<TreeItem>() {
             public void onSelection(SelectionEvent<TreeItem> event) {
                 selectionChanged(directoryFromTreeItem(event.getSelectedItem()));
             }
         });
+
+        // Remember when the user expands/collapses a node, to restore the
+        // state after a refresh.
+        tree.addOpenHandler(this);
+        tree.addCloseHandler(this);
     }
 
     public void setRepository(String repository) {
@@ -65,6 +94,14 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
 
     public HandlerRegistration addSelectionHandler(SelectionHandler<Directory> handler) {
         return addHandler(handler, SelectionEvent.getType());
+    }
+
+    public void onOpen(OpenEvent<TreeItem> event) {
+        expandedDirs.add(directoryFromTreeItem(event.getTarget()));
+    }
+
+    public void onClose(CloseEvent<TreeItem> event) {
+        expandedDirs.remove(directoryFromTreeItem(event.getTarget()));
     }
 
     public Directory selected() {
@@ -97,6 +134,8 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
 
     public void refresh() {
         tree.clear();
+        whichNode.clear();
+
         treeItemToSelect = null;
         directoryStructure.walk(new DirWalker<TreeItem>() {
             public TreeItem walk(TreeItem parent, Dir child) {
@@ -105,6 +144,7 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
 
                 TreeItem ti = parent == null ? tree.addItem(name) : parent.addItem(name);
                 ti.setUserObject(child.directory());
+                whichNode.put(child.directory(), ti); // Register the directory->node mapping
 
                 if (decorator != null) decorator.decorateDirectoryNode(child.directory(), ti);
                 if (child.directory().equals(selectedDirectory)) treeItemToSelect = ti;
@@ -112,7 +152,7 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
             }
         });
 
-        expandAll();
+        expandNodes();
 
         // Either select the root (without firing an event)
         // or reselect the previously selected directory.
@@ -125,9 +165,41 @@ public class DirectoryTree extends Composite implements HasSelectionHandlers<Dir
             tree.setSelectedItem(treeItemToSelect, false);
     }
 
-    public void expandAll() {
-        for (int i = 0; i < tree.getItemCount(); i++)
-            expand(tree.getItem(i));
+    /**
+     * Add the given directory and all of its parents to the list of
+     * expanded nodes.
+     */
+    public void makeVisible(Directory directory) {
+        if (_makeVisible(directory))
+            expandNodes();
+    }
+
+    public void makeVisible(List<Directory> directories) {
+        boolean change = false;
+        for (Directory directory: directories)
+            change |= _makeVisible(directory);
+
+        if (change)
+            expandNodes();
+    }
+
+    private boolean _makeVisible(Directory directory) {
+        boolean change = expandedDirs.add(directory);
+        if (!directory.root())
+            change |= _makeVisible(directory.parent());
+        return change;
+    }
+
+    /**
+     * For all directory nodes that should be expanded, expand the
+     * appropriate TreeItem.
+     */
+    private void expandNodes() {
+        for (Directory dir: expandedDirs) {
+            TreeItem ti = whichNode.get(dir);
+            if (ti != null)
+                ti.setState(true, false);
+        }
     }
 
     public void expand(TreeItem ti) {
