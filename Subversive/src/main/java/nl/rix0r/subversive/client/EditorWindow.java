@@ -64,6 +64,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     @UiField GroupList groups;
     @UiField UserList users;
     @UiField TabLayoutPanel tabpanel;
+    @UiField Image alertImage;
 
     private EditSession editSession;
     private UserRetrievalServiceAsync userRetrieval;
@@ -144,11 +145,13 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     }
 
     public void directoryRetrievalFailed(String errorMessage) {
-        Window.alert(errorMessage);
+        alertImage.setTitle(errorMessage);
+        alertImage.setVisible(true);
     }
 
     public void directoriesRetrieved(List<Directory> directories) {
         directoryTree.add(directories);
+        alertImage.setVisible(false);
     }
 
     private void editingDone() {

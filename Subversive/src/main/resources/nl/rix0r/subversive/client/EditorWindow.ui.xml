@@ -3,6 +3,19 @@
     xmlns:g='urn:import:com.google.gwt.user.client.ui'
     xmlns:s='urn:import:nl.rix0r.subversive.client'>
 
+    <ui:with field="res" type="nl.rix0r.subversive.client.Resources"/>
+    <ui:style>
+        .relpos { position: relative; }
+        .right {
+            position: absolute;
+            left: 100% !important;
+            margin-left: -20px !important;
+            margin-top: 4px !important;
+            z-index: 100;
+        }
+    </ui:style>
+
+
     <g:HTMLPanel>
         <h2><g:Label ui:field="repoTitle" /></h2>
         <g:Hyperlink targetHistoryToken="">&lt;&lt; Back to repository list</g:Hyperlink>
@@ -11,7 +24,10 @@
                 <td>
                     Directories
                     <g:DecoratorPanel>
-                        <s:DirectoryTree width="300px" height="400px" ui:field="directoryTree" />
+                        <g:HTMLPanel styleName="{style.relpos}">
+                            <g:Image ui:field="alertImage" resource="{res.warningImage}" styleName="{style.right}" visible="false" />
+                            <s:DirectoryTree ui:field="directoryTree" width="300px" height="400px" />
+                        </g:HTMLPanel>
                     </g:DecoratorPanel>
                 </td>
                 <td>

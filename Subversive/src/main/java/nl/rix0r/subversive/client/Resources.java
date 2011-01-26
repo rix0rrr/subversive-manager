@@ -26,4 +26,7 @@ public interface Resources extends ClientBundle {
 
     @Source("anonymous.png")
     public ImageResource anonymousImage();
+
+    @Source("error.png")
+    public ImageResource warningImage();
 }

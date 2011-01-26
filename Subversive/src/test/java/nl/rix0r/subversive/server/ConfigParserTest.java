@@ -57,6 +57,18 @@ public class ConfigParserTest {
                 ((Permission)config.permissions(new Directory("a", "/"), new User("master_foo")).toArray()[0]).access());
     }
 
+    @Test
+    public void skipInvalidBlocks() throws Exception {
+        config.load(input(
+                "[groups]",
+                "admin=rix0r",
+                "[:/]",
+                "anothergroup=henk"
+                ));
+        Assert.assertEquals(1, config.groupDefinitions().size());
+        Assert.assertEquals("admin", config.groupDefinitions().iterator().next().group().name());
+    }
+
     private Reader input(String... lines) {
         return new StringReader(StringUtils.join(lines, "\n"));
     }

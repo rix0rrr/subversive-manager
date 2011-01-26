@@ -126,14 +126,15 @@ public class DiskConfiguration extends Configuration {
          *   [REPO:/PATH]       Start of permission
          */
         private void block(int number, String line) {
+            inGroupBlock   = false;
+            blockDirectory = null;
+
             Matcher m = blockPattern.matcher(line);
             if (!m.matches()) {
                 warning("Line " + number + ": invalid block: " + line);
                 return;
             }
 
-            inGroupBlock   = false;
-            blockDirectory = null;
             if (m.groupCount() == 1 || m.group(2) == null)
                 simpleBlock(m.group(1), number, line);
             else
@@ -251,7 +252,11 @@ public class DiskConfiguration extends Configuration {
         private void directory(Directory directory) {
             if (lastDirectory != null && lastDirectory.equals(directory)) return;
 
-            writer.println("[" + directory.repository() + ":" + directory.path() + "]");
+            if (directory.repository().equals("")) // Special no-name repository
+                writer.println("[" + directory.path() + "]"); // Path is now supposed to be /
+            else
+                writer.println("[" + directory.repository() + ":" + directory.path() + "]");
+
             lastDirectory = directory;
         }
 
