@@ -114,8 +114,8 @@ public class EditSession implements Serializable {
     /**
      * Returns all directories that have configured permissions
      */
-    public List<Directory> configuredDirectories() {
-        List<Directory> ret = new ArrayList<Directory>();
+    public Set<Directory> configuredDirectories() {
+        Set<Directory> ret = new HashSet<Directory>();
         for (Permission p: configuration().permissions(null, null))
             ret.add(p.directory());
         return ret;

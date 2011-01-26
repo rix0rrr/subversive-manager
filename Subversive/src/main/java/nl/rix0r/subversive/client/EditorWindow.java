@@ -14,7 +14,6 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -26,6 +25,7 @@ import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
 import java.util.List;
+import java.util.Set;
 import nl.rix0r.subversive.client.DirectoryTree.DirectoryDecorator;
 import nl.rix0r.subversive.client.GroupList.GroupDecorator;
 import nl.rix0r.subversive.client.PermissionsList.PrincipalAccess;
@@ -86,10 +86,19 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         refresh();
     }
 
+    private Set<Directory> lastConfiguredDirectories;
+
     public void refresh() {
-        List<Directory> configuredDirectories = editSession.configuredDirectories();
+        Set<Directory> configuredDirectories = editSession.configuredDirectories();
         directoryTree.add(configuredDirectories);
         directoryTree.makeVisible(configuredDirectories);
+
+        if (lastConfiguredDirectories == null
+                || !lastConfiguredDirectories.equals(configuredDirectories)) {
+            directoryTree.refresh();
+            lastConfiguredDirectories = configuredDirectories;
+        }
+
         repoTitle.setText(editSession.repository());
         groups.setGroups(editSession.availableGroups());
         refreshPermissions();

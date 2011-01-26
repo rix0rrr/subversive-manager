@@ -2,6 +2,7 @@
 package nl.rix0r.subversive.client;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -22,7 +23,7 @@ public class DirectoryStructure {
      *
      * Returns whether a new directory was effectively added.
      */
-    public boolean add(List<Directory> directories) {
+    public boolean add(Collection<Directory> directories) {
         boolean change = false;
         for (Directory directory: directories)
             change |= add(directory);

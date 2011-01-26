@@ -14,14 +14,13 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Tree;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import nl.rix0r.subversive.client.DirectoryStructure.Dir;
@@ -121,7 +120,7 @@ public class DirectoryTree extends Composite implements
      * Load this tree from the given list of directories, inferring
      * directories that are not actually in the given set
      */
-    public void add(List<Directory> directories) {
+    public void add(Collection<Directory> directories) {
         if (directoryStructure.add(directories))
             refresh();
     }
@@ -175,7 +174,7 @@ public class DirectoryTree extends Composite implements
             expandNodes();
     }
 
-    public void makeVisible(List<Directory> directories) {
+    public void makeVisible(Collection<Directory> directories) {
         boolean change = false;
         for (Directory directory: directories)
             change |= _makeVisible(directory);
