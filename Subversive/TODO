@@ -6,7 +6,6 @@ USABILITY
     - Editable configuration from front-end
 
 ENHANCEMENTS
-    - Intelligent UserRetrieval caching on client
     - LDAP
 
 
