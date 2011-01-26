@@ -10,6 +10,7 @@ import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -24,6 +25,8 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 import com.google.gwt.user.client.ui.Widget;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import nl.rix0r.subversive.client.DirectoryTree.DirectoryDecorator;
@@ -67,17 +70,24 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     @UiField Image alertImage;
 
     private EditSession editSession;
-    private UserRetrievalServiceAsync userRetrieval;
+    private CachingUserRetrieval userRetrieval;
 
-    public EditorWindow(EditSession editSession, UserRetrievalServiceAsync userRetrieval) {
+    public EditorWindow(EditSession editSession, CachingUserRetrieval userRetrieval) {
         initWidget(uiBinder.createAndBindUi(this));
         wireUp();
         this.userRetrieval = userRetrieval;
-        users.setUserRetrievalService(userRetrieval);
+        users.setUserRetrieval(userRetrieval);
         groups.setDecorator(groupDecorator);
         directoryTree.setDecorator(directoryDecorator);
 
         setEditSession(editSession);
+
+        // When the user retrieval fires, we refresh
+        userRetrieval.addValueChangeHandler(new ValueChangeHandler<Void>() {
+            public void onValueChange(ValueChangeEvent<Void> event) {
+                refresh();
+            }
+        });
     }
 
     public void setEditSession(EditSession editSession) {
@@ -134,11 +144,29 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
 
         if (directory == null) return;
         selectedDirectory.setText(directory.path());
-        permissions.add(editSession.permissions(directory));
+        permissions.add(expandUserInfo(editSession.permissions(directory)));
 
         // Doesn't really have anything to do with that but
         // always seems to go hand-in-hand.
         refreshButtonStates();
+    }
+
+    /**
+     * Return a list of permissions with user info expanded
+     */
+    private List<Permission> expandUserInfo(Collection<Permission> permissions) {
+        List<Permission> ret = new ArrayList<Permission>();
+        for (Permission perm: permissions) {
+            if (perm.principal() instanceof User)
+                ret.add(new Permission(
+                        perm.directory(),
+                        userRetrieval.expandUser((User)perm.principal()),
+                        perm.access()));
+            else
+                ret.add(perm);
+        }
+
+        return ret;
     }
 
     private void wireUp() {

@@ -54,9 +54,9 @@ public class GroupEditor extends Composite implements HasCloseHandlers<Boolean> 
     private Set<User> added   = new HashSet<User>();
     private Set<User> removed = new HashSet<User>();
 
-    public GroupEditor(UserRetrievalServiceAsync retrieval) {
+    public GroupEditor(CachingUserRetrieval retrieval) {
         initWidget(uiBinder.createAndBindUi(this));
-        allUsers.setUserRetrievalService(retrieval);
+        allUsers.setUserRetrieval(retrieval);
     }
 
     public void newGroup(String repository) {

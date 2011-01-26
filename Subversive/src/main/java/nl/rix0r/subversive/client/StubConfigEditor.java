@@ -3,6 +3,7 @@ package nl.rix0r.subversive.client;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import nl.rix0r.subversive.subversion.Access;
 import nl.rix0r.subversive.subversion.Configuration;
@@ -87,17 +88,21 @@ public class StubConfigEditor implements ConfigEditorServiceAsync, UserRetrieval
         callback.onSuccess(new EditSession(repository, configuration.subset(repository)));
     }
 
-    public void initialUserSet(AsyncCallback<List<User>> callback) {
+    public void initialUserSet(AsyncCallback<Collection<User>> callback) {
         callback.onSuccess(new ArrayList<User>(allUsers));
     }
 
-    public void findUsers(String like, AsyncCallback<List<User>> callback) {
+    public void findUsers(String like, AsyncCallback<Collection<User>> callback) {
         List<User> ret = new ArrayList<User>();
         for (User user: allUsers)
             if (user.matches(like))
                 ret.add(user);
 
         callback.onSuccess(ret);
+    }
+
+    public void expandInfo(Collection<User> p0, AsyncCallback<Collection<User>> callback) {
+        callback.onSuccess(p0);
     }
 
     public void myRepositories(String username, String password, AsyncCallback<List<String>> callback) {

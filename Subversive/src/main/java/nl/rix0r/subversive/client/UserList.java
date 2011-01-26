@@ -38,7 +38,7 @@ public class UserList extends Composite implements
     @UiField(provided=true) UserSelectList users;
     @UiField TextBox searchField;
 
-    private UserRetrievalServiceAsync service;
+    private CachingUserRetrieval service;
     private boolean loading = false;
     private Collection<User> baseUsers;
 
@@ -58,7 +58,7 @@ public class UserList extends Composite implements
     /**
      * Set the service that can be used to retrieve information about users
      */
-    public void setUserRetrievalService(UserRetrievalServiceAsync service) {
+    public void setUserRetrieval(CachingUserRetrieval service) {
         this.baseUsers = null;
         if (this.service != service) {
             this.service = service;
@@ -85,7 +85,7 @@ public class UserList extends Composite implements
         return ret;
     }
 
-    public UserRetrievalServiceAsync getUserRetrievalService() {
+    public CachingUserRetrieval getUserRetrieval() {
         return service;
     }
 
@@ -97,14 +97,16 @@ public class UserList extends Composite implements
     private void retrieveBasedOnFilter() {
         if (loading) return;
         loading = true;
+        users.getModel().clear();
+        // Beware: can fire the callback twice if a partial response comes from the cache
         service.findUsers(searchField.getValue(), fillUsers);
     }
 
-    AsyncCallback<List<User>> fillUsers = new Subversive.Callback<List<User>>() {
-        public void onSuccess(List<User> result) {
+    AsyncCallback<Collection<User>> fillUsers = new Subversive.Callback<Collection<User>>() {
+        public void onSuccess(Collection<User> result) {
             loading = false;
-            users.getModel().replace(result);
-            users.setSelectedRow(0);
+            users.getModel().addAll(result);
+            if (users.getSelectedRow() == -1) users.setSelectedRow(0);
         }
     };
 

@@ -9,6 +9,7 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import nl.rix0r.subversive.client.ConfigEditorService;
@@ -142,14 +143,19 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
         }
     }
 
-    public List<User> findUsers(String like) throws ServiceException {
+    public Collection<User> findUsers(String like) throws ServiceException {
         initialize();
         return userAuthority.findUsers(like);
     }
 
-    public List<User> initialUserSet() throws ServiceException {
+    public Collection<User> initialUserSet() throws ServiceException {
         initialize();
         return userAuthority.initialSet();
+    }
+
+    public Collection<User> expandInfo(Collection<User> input) throws ServiceException {
+        initialize();
+        return userAuthority.expandInfo(input);
     }
 
     private void initialize() throws ServiceException {

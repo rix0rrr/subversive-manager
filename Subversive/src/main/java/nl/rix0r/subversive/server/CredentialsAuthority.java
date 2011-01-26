@@ -1,8 +1,8 @@
 
 package nl.rix0r.subversive.server;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import nl.rix0r.subversive.subversion.User;
 
 /**
@@ -25,12 +25,19 @@ public interface CredentialsAuthority {
      * Return a list of users from the database matching the given query
      * string.
      */
-    public List<User> findUsers(String like);
+    public Collection<User> findUsers(String like);
 
     /**
      * Return an initial set of users that are shown without searching.
      *
      * The back-end may decide to honor this request or not.
      */
-    public List<User> initialSet();
+    public Collection<User> initialSet();
+
+    /**
+     * Expand information on the given set of users
+     *
+     * Adds full names if all you've got is user names.
+     */
+    public Collection<User> expandInfo(Collection<User> input);
 }

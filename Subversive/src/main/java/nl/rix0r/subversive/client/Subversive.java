@@ -24,6 +24,7 @@ import nl.rix0r.subversive.subversion.Modification;
 public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     private ConfigEditorServiceAsync configEditor;
     private UserRetrievalServiceAsync userService;
+    private CachingUserRetrieval userRetrieval;
 
     private LoginDialog loginDialog = new LoginDialog(this);
     private String username;
@@ -36,6 +37,9 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
         //StubConfigEditor stub = new StubConfigEditor();
         //configEditor = stub;
         //userService = stub;
+
+        // Add a caching layer to the user retrieval service
+        userRetrieval = new CachingUserRetrieval(userService);
 
         errorLabel.setStyleName("gwt-errorMessage");
     }
@@ -78,7 +82,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
         setError("");
         configEditor.begin(repository, username, password, new Callback<EditSession>() {
             public void onSuccess(EditSession result) {
-                final EditorWindow ew = new EditorWindow(result, userService);
+                final EditorWindow ew = new EditorWindow(result, userRetrieval);
                 ew.addCloseHandler(new CloseHandler<EditSession>() {
                     public void onClose(CloseEvent<EditSession> event) {
                         commitSession(event.getTarget());

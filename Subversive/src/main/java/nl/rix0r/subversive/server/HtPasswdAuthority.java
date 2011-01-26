@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import nl.rix0r.subversive.subversion.User;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.mortbay.jetty.security.B64Code;
 import org.mortbay.jetty.security.UnixCrypt;
 
@@ -84,20 +86,19 @@ public class HtPasswdAuthority implements CredentialsAuthority {
         }
     }
 
-
-    public List<User> findUsers(String like) {
+    public Collection<User> findUsers(String like) {
         List<User> ret = new ArrayList<User>();
         for (User u: allUsers())
             if (u.matches(like))
                 ret.add(u);
-        return ret;
+        return expandInfo(ret);
     }
 
-    public List<User> initialSet() {
-        return allUsers();
+    public Collection<User> initialSet() {
+        return expandInfo(allUsers());
     }
 
-    private List<User> allUsers() {
+    private Collection<User> allUsers() {
         try {
             List<String> lines  = FileUtils.readLines(file);
 
@@ -109,9 +110,27 @@ public class HtPasswdAuthority implements CredentialsAuthority {
                     result.add(new User(line.substring(0, ix)));
             }
 
-            return result;
+            return expandInfo(result);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    /**
+     * Add fullname information to the user object
+     *
+     * Or not.
+     */
+    private User expandUser(User user) {
+        return user;
+    }
+
+    public Collection<User> expandInfo(Collection<User> input) {
+        List<User> ret = new ArrayList<User>();
+
+        for (User user: input)
+            ret.add(expandUser(user));
+
+        return ret;
     }
 }
