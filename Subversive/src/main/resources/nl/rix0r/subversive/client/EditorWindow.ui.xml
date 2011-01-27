@@ -46,10 +46,6 @@
                 <td>
                     <g:TabLayoutPanel width="200px" height="400px" barUnit="EM" barHeight="1.5" ui:field="tabpanel">
                         <g:tab>
-                            <g:header>Users</g:header>
-                            <s:UserList ui:field="users" />
-                        </g:tab>
-                        <g:tab>
                             <g:header>Groups</g:header>
                             <g:DockLayoutPanel unit="EM">
                                 <g:center>
@@ -63,6 +59,10 @@
                                     </g:HTMLPanel>
                                 </g:south>
                             </g:DockLayoutPanel>
+                        </g:tab>
+                        <g:tab>
+                            <g:header>Users</g:header>
+                            <s:UserList ui:field="users" />
                         </g:tab>
                     </g:TabLayoutPanel>
                 </td>

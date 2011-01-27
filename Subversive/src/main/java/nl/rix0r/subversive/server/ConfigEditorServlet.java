@@ -22,6 +22,7 @@ import nl.rix0r.subversive.subversion.Group;
 import nl.rix0r.subversive.subversion.GroupDefinition;
 import nl.rix0r.subversive.subversion.Modification;
 import nl.rix0r.subversive.subversion.User;
+import org.apache.log4j.Logger;
 
 /**
  * @author rix0rrr
@@ -29,6 +30,7 @@ import nl.rix0r.subversive.subversion.User;
 public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigEditorService, UserRetrievalService {
     private final static String propertiesFile = "subversive.properties";
     private final static int invalidPasswordSleep = 2000;
+    private final static Logger log = Logger.getLogger(ConfigEditorServlet.class);
 
     private Properties properties;
     private File configFile;
@@ -144,18 +146,33 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
     }
 
     public Collection<User> findUsers(String like) throws ServiceException {
-        initialize();
-        return userAuthority.findUsers(like);
+        try {
+            initialize();
+            return userAuthority.findUsers(like);
+        } catch (Exception ex) {
+            log.warn(ex.getMessage(), ex);
+            throw new ServiceException(ex);
+        }
     }
 
     public Collection<User> initialUserSet() throws ServiceException {
-        initialize();
-        return userAuthority.initialSet();
+        try {
+            initialize();
+            return userAuthority.initialSet();
+        } catch (Exception ex) {
+            log.warn(ex.getMessage(), ex);
+            return new ArrayList<User>();
+        }
     }
 
     public Collection<User> expandInfo(Collection<User> input) throws ServiceException {
-        initialize();
-        return userAuthority.expandInfo(input);
+        try {
+            initialize();
+            return userAuthority.expandInfo(input);
+        } catch (Exception ex) {
+            log.warn(ex.getMessage(), ex);
+            return input;
+        }
     }
 
     private void initialize() throws ServiceException {
@@ -263,6 +280,27 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
             String htPasswdFile = properties.getProperty("auth.htpasswd");
             if (htPasswdFile != null) {
                 userAuthority = new HtPasswdAuthority(new File(htPasswdFile));
+                return;
+            }
+
+            String ldapUrl = properties.getProperty("auth.ldap.url");
+            if (ldapUrl != null) {
+                LdapAuthority ldap = new LdapAuthority(ldapUrl);
+
+                String searchUser = properties.getProperty("auth.ldap.searchuserdn");
+                String searchPass = properties.getProperty("auth.ldap.searchpassword");
+                if (searchUser != null && !searchUser.equals(""))
+                    ldap.setSearchLogin(searchUser, searchPass);
+
+                String usernameField = properties.getProperty("auth.ldap.usernamefield");
+                if (usernameField != null && !usernameField.equals(""))
+                    ldap.setUsernameField(usernameField);
+
+                String fullNameField = properties.getProperty("auth.ldap.fullnamefield");
+                if (fullNameField != null && !fullNameField.equals(""))
+                    ldap.setFullNameFields(fullNameField);
+
+                userAuthority = ldap;
                 return;
             }
 

@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import nl.rix0r.subversive.subversion.User;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.mortbay.jetty.security.B64Code;
 import org.mortbay.jetty.security.UnixCrypt;
 
@@ -29,6 +29,7 @@ import org.mortbay.jetty.security.UnixCrypt;
  * @author rix0rrr
  */
 public class HtPasswdAuthority implements CredentialsAuthority {
+    private final static Logger log = Logger.getLogger(HtPasswdAuthority.class);
     private final File file;
 
     public HtPasswdAuthority(File file) {
@@ -49,8 +50,10 @@ public class HtPasswdAuthority implements CredentialsAuthority {
                 if (line.startsWith(username + ":"))
                     return verifyPasswordHash(password, line.substring(username.length() + 1));
 
+            log.warn("User not found in htpasswd file: " + username);
             return false; // Not found
         } catch (IOException ex) {
+            log.warn(ex.getMessage(), ex);
             throw new RuntimeException(ex);
         }
     }
