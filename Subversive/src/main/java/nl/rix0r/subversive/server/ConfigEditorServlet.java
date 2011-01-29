@@ -56,6 +56,8 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
             DiskConfiguration config = new DiskConfiguration(configFile);
             config.load();
 
+            System.out.println(modifications);
+
             // We don't do permission validation live: otherwise we could
             // never rename (remove and re-add) the Owners group. Instead,
             // determine these things beforehand.
@@ -64,6 +66,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
             for (Modification mod: modifications) {
                 try {
                     mod.apply(config);
+                    log.info(username + " applied change to " + mod.repository() + ": " + mod);
                 } catch (Exception ex) {
                     errors.add(ex.getMessage());
                 }

@@ -324,10 +324,17 @@ public class DiskConfiguration extends Configuration {
         }
 
         protected static String serialize(Principal principal) {
-            if (principal instanceof Group) return "@" + encode(((Group)principal).name());
+            if (principal instanceof Group) return serializeGroupReference((Group)principal);
             if (principal instanceof Anonymous) return "*";
             assert principal instanceof User;
             return encode(((User)principal).username());
+        }
+
+        private static String serializeGroupReference(Group group) {
+            if (group.global())
+                return "@" + encode(group.name());
+            else
+                return "@" + encode(group.repository()) + "_" + encode(group.name());
         }
     }
 

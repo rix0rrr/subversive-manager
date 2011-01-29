@@ -6,6 +6,7 @@ import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.HistoryListener;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
@@ -62,6 +63,10 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
         RootPanel.get("app").add(screen);
     }
 
+    private void setTitle(String title) {
+        Window.setTitle(title);
+    }
+
     public void tryLogin(String username, String password) {
         this.username = username;
         this.password = password;
@@ -70,6 +75,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     }
 
     private void showLoginDialog() {
+        setTitle("Subversive");
         setError("");
         display(loginDialog);
     }
@@ -78,6 +84,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
         setError("");
         configEditor.myRepositories(username, password, new Callback<List<String>>() {
             public void onSuccess(List<String> result) {
+                setTitle("My Repositories");
                 display(new RepositoryList(result));
             }
         });
@@ -94,6 +101,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
                     }
                 });
 
+                setTitle(repository);
                 display(ew);
 
                 // Start loading directories, forward to editor when retrieved

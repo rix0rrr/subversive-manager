@@ -2,7 +2,6 @@
 package nl.rix0r.subversive.server;
 
 import java.util.Collection;
-import java.util.List;
 import nl.rix0r.subversive.subversion.User;
 
 /**
