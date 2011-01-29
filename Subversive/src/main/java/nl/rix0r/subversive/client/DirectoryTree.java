@@ -184,9 +184,11 @@ public class DirectoryTree extends Composite implements
     }
 
     private boolean _makeVisible(Directory directory) {
-        boolean change = expandedDirs.add(directory);
-        if (!directory.root())
+        boolean change = false;
+        if (!directory.root()) {
+            change |= expandedDirs.add(directory.parent());
             change |= _makeVisible(directory.parent());
+        }
         return change;
     }
 
