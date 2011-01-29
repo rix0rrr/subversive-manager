@@ -10,6 +10,7 @@ import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import nl.rix0r.subversive.client.ConfigEditorService;
 import nl.rix0r.subversive.client.ServiceException;
 import nl.rix0r.subversive.client.UserRetrievalService;
@@ -31,7 +32,6 @@ import org.apache.log4j.Logger;
 public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigEditorService, UserRetrievalService {
     private final static int invalidPasswordSleep = 2000;
     private final static Logger log = Logger.getLogger(ConfigEditorServlet.class);
-
 
     private PropertiesConfiguration properties;
     private File configFile;
@@ -149,6 +149,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
     public Collection<User> findUsers(String like) throws ServiceException {
         try {
             initialize();
+            if (userAuthority == null) return new ArrayList<User>(); // None
             return userAuthority.findUsers(like);
         } catch (Exception ex) {
             log.warn(ex.getMessage(), ex);
@@ -159,6 +160,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
     public Collection<User> initialUserSet() throws ServiceException {
         try {
             initialize();
+            if (userAuthority == null) return new ArrayList<User>(); // None
             return userAuthority.initialSet();
         } catch (Exception ex) {
             log.warn(ex.getMessage(), ex);
@@ -169,6 +171,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
     public Collection<User> expandInfo(Collection<User> input) throws ServiceException {
         try {
             initialize();
+            if (userAuthority == null) return new ArrayList<User>(); // None
             return userAuthority.expandInfo(input);
         } catch (Exception ex) {
             log.warn(ex.getMessage(), ex);
@@ -218,6 +221,9 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
      * but that's better than the alternative.
      */
     private void authenticate(String username, String password) throws ServiceException {
+        if (userAuthority == null)
+            throw new ServiceException("No authentication mechanism specified, and no credentials passed by proxy. Check the configuration.");
+
         if (!userAuthority.authenticate(username, password)) {
             try {
                 Thread.sleep(invalidPasswordSleep);
@@ -311,7 +317,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
                 return;
             }
 
-            throw new ServiceException("Property file: must set a user authority, either htpasswd file or LDAP server.");
+            userAuthority = null;
         } catch (Exception ex) {
             throw new ServiceException(ex);
         }

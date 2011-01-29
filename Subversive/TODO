@@ -3,11 +3,8 @@ CORE FEATURES
 
 USABILITY
     - Multiselect in lists
-    - Editable configuration from front-end
 
 ENHANCEMENTS
-    - LDAP
-
 
 AESTHETICS
     - Show group members preview in group list ("a, b and 3 more...")
@@ -16,8 +13,5 @@ AESTHETICS
     - Favicon
     - Custom user logo (allowing branding = good for enterprise users)
 
-
 DEPLOYMENT
-    - Configuration
-    - Setup wizard
     - Read authentication from Apache proxy (REMOTE_USER et. al.)
