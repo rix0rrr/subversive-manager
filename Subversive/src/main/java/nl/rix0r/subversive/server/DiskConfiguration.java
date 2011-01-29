@@ -283,7 +283,9 @@ public class DiskConfiguration extends Configuration {
         }
 
         protected static String encode(String name) {
-            return name.replace(" ", "-");
+            return name
+                    .replace(" ", "-")
+                    .replace("_", "-"); // _ is a metacharacter, can't allow it
         }
     }
 
