@@ -1,0 +1,15 @@
+Installation Instructions
+-------------------------
+
+1. Deploy subversive.war on a J2EE server.
+
+2. Copy subversive.conf.dist to either /etc/subversive.conf or to the home directory
+   of the user running the J2EE server as .subversive.conf.
+
+3. Edit the configuration file to taste. Reloading of the application is not
+   necessary!
+
+-------------------------
+
+See also:
+    http://code.google.com/p/subversive-manager/wiki/InstallationInstructions

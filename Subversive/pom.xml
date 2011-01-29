@@ -7,7 +7,7 @@
   <groupId>nl.rix0r</groupId>
   <artifactId>subversive</artifactId>
   <packaging>war</packaging>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.1</version>
   <name>Subversive</name>
 
   <properties>

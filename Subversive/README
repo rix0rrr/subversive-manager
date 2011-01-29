@@ -1,0 +1,64 @@
+
+  SUBVERSIVE
+  Subversion Configuration Manager
+
+--------------------------------------------------
+
+Subversive is an editor for Subversion configuration files: it has been
+specifically designed to delegate the management of repository configurations
+to end-users, so system administrators don't have to deal with this. This is
+especially useful in large organizations, where the people using the
+repositories are usually not the people running the servers.
+
+Subversive gives people the ability to edit the access rights to their own
+repositories directly, preventing them from making mistakes and also
+isolates them from accessing repositories they shouldn't be messing with.
+
+  FEATURES
+
+- Works without a database. Reads and writes the Subversion configuration file
+  directly.
+
+- Does not destroy manual edits. System administrators still have the ability
+  to edit the Subversion configuration file manually with a text editor; their
+  changes will be picked up by Subversive, not overwritten on the next access.
+
+- Supports LDAP. Users can be authenticated against and user lists retrieved
+  from both a .htpasswd file as used by Apache (typically used as a
+  WebDAV/Subversion server), as well as an LDAP server. This makes Subversive
+  suitable for both small and large organizations.
+
+  PERMISSIONS MODEL
+
+Subversive makes some assumptions about the way permissions are structured in
+your svn_access file, which may or may not be compatible with the way your
+permissions are currently structured.
+
+There are two types of groups:
+
+- Local groups: these groups have the name of the repository in them, such as
+  Project_ReadOnly, or Newspaper_Editors. We consider local groups to be scoped
+  to the repository in their name so they should only be assigned in that
+  repository. The Subversive interface will not allow you to assign these
+  groups in other repositories. Of course, you could still do this manually,
+  but you'd better not. The advantage of local groups is that they can be
+  edited by repository owners without influencing other repositories.
+
+- Global groups: groups without a repository name in them are global groups.
+  They cannot be edited from within Subversive, but they can be assigned
+  permissions in repositories.
+
+Subversive distinguishes between two types of users:
+
+- Repository Owners; can edit all permissions and groups of the repositories
+  they "own".
+
+- Administrators: can edit all repositories.
+
+A user's role is determined by their membership of certain groups with special
+names. By default, all users in the global group "Admins" are considered
+Administrators, and every user in the local repository groups named "Owners"
+are considered Owner of that repository.
+
+Since the Owners group is also a regular local group, it can be edited by the
+owners as well, which means they can assign ownership to other people.
