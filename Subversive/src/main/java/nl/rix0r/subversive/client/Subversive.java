@@ -7,6 +7,7 @@ import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.HistoryListener;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -24,6 +25,7 @@ import nl.rix0r.subversive.subversion.Modification;
 public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     private ConfigEditorServiceAsync configEditor;
     private UserRetrievalServiceAsync userService;
+    private ServerInfoServiceAsync serverInfo;
     private CachingUserRetrieval userRetrieval;
 
     private LoginDialog loginDialog = new LoginDialog(this);
@@ -34,6 +36,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     public Subversive() {
         configEditor = GWT.create(ConfigEditorService.class);
         userService  = GWT.create(UserRetrievalService.class);
+        serverInfo   = GWT.create(ServerInfoService.class);
         //StubConfigEditor stub = new StubConfigEditor();
         //configEditor = stub;
         //userService = stub;
@@ -49,6 +52,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
         RootPanel.get("app").getElement().setInnerHTML("");
 
         History.addHistoryListener(this);
+        retrieveBrandingImage();
         showLoginDialog();
     }
 
@@ -152,6 +156,29 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     public static void setError(String message) {
         errorLabel.setText(message);
         errorLabel.setVisible(message != null && !message.equals(""));
+    }
+
+    private void retrieveBrandingImage() {
+        serverInfo.getBrandingImage(new AsyncCallback<String[]>() {
+            public void onFailure(Throwable caught) {
+                // Too bad
+            }
+
+            public void onSuccess(String[] result) {
+                String image = result.length > 0 ? result[0] : "";
+                String link  = result.length > 1 ? result[1] : "";
+
+                if (image != null && !image.equals("")) {
+                    String imageTag = "<img src=\"" + image + "\" class=\"brandingImage\">";
+
+                    if (link != null && !link.equals("")) {
+                        imageTag = "<a href=\"" + link + "\">" + imageTag + "</a>";
+                    }
+
+                    RootPanel.get("header").add(new HTML(imageTag));
+                }
+            }
+        });
     }
 
     abstract public static class Callback<T> implements AsyncCallback<T> {

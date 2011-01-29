@@ -8,7 +8,6 @@ ENHANCEMENTS
 
 AESTHETICS
     - Show group members preview in group list ("a, b and 3 more...")
-    - Custom user logo (allowing branding = good for enterprise users)
 
 DEPLOYMENT
     - Read authentication from Apache proxy (REMOTE_USER et. al.)

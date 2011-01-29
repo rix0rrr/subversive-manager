@@ -6,7 +6,9 @@ body {
 }
 
 #header {
-    height: 60px;
+    position: relative; /* Need this to have the logo's clip to this div's height */
+    height: 80px;
+    overflow: hidden;
 }
 
 #main {
@@ -23,6 +25,13 @@ body {
     left: 100%;
     margin-left: -110px;
     top: 10px;
+}
+
+.brandingImage {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    border: 0px;
 }
 
 #app {

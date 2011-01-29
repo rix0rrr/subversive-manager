@@ -10,8 +10,8 @@ import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import nl.rix0r.subversive.client.ConfigEditorService;
+import nl.rix0r.subversive.client.ServerInfoService;
 import nl.rix0r.subversive.client.ServiceException;
 import nl.rix0r.subversive.client.UserRetrievalService;
 import nl.rix0r.subversive.subversion.Configuration;
@@ -29,7 +29,9 @@ import org.apache.log4j.Logger;
 /**
  * @author rix0rrr
  */
-public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigEditorService, UserRetrievalService {
+public class ConfigEditorServlet extends RemoteServiceServlet implements
+        ConfigEditorService, UserRetrievalService, ServerInfoService {
+
     private final static int invalidPasswordSleep = 2000;
     private final static Logger log = Logger.getLogger(ConfigEditorServlet.class);
 
@@ -334,4 +336,19 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
         }
     }
 
+    /**
+     * Return the branding image from the config
+     */
+    public String[] getBrandingImage() {
+        try {
+            initialize();
+            return new String[] {
+                properties.getString("subversive.brandingimage", ""),
+                properties.getString("subversive.brandinglink", "")
+            };
+        } catch (Exception ex) {
+            log.warn("Error retrieving branding image", ex);
+            return new String[0];
+        }
+    }
 }

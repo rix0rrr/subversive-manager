@@ -44,3 +44,13 @@ subversive.ownergroup=owners
 
 # The name of the global group that contains all users with administrative rights.
 subversive.admingroup=admins
+
+#-------------------------------------------------
+#  Miscellaneous
+#
+
+# Hyperlink to an image that will be displayed in the top-left corner of
+# the screen, for branding purposes. It can be hyperlinked if desired.
+# Maximum height is 70 pixels.
+#subversive.brandingimage=
+#subversive.brandinglink=
