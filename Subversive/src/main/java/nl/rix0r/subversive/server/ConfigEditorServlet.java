@@ -4,14 +4,12 @@ package nl.rix0r.subversive.server;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
 import nl.rix0r.subversive.client.ConfigEditorService;
 import nl.rix0r.subversive.client.ServiceException;
 import nl.rix0r.subversive.client.UserRetrievalService;
@@ -22,17 +20,20 @@ import nl.rix0r.subversive.subversion.Group;
 import nl.rix0r.subversive.subversion.GroupDefinition;
 import nl.rix0r.subversive.subversion.Modification;
 import nl.rix0r.subversive.subversion.User;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration.reloading.FileChangedReloadingStrategy;
 import org.apache.log4j.Logger;
 
 /**
  * @author rix0rrr
  */
 public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigEditorService, UserRetrievalService {
-    private final static String propertiesFile = "subversive.properties";
     private final static int invalidPasswordSleep = 2000;
     private final static Logger log = Logger.getLogger(ConfigEditorServlet.class);
 
-    private Properties properties;
+
+    private PropertiesConfiguration properties;
     private File configFile;
     private CredentialsAuthority userAuthority;
     private RepositoryLister repositoryLister;
@@ -187,14 +188,25 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
     private void loadProperties() throws ServiceException {
         if (properties != null) return;
 
-        InputStream is = getClass().getClassLoader().getResourceAsStream(propertiesFile);
-        if (is == null) throw new ServiceException("Properties file not found: " + propertiesFile);
+        if (properties == null) properties = tryFile("/etc/subversive.conf"); // System-wide
+        if (properties == null) properties = tryFile(".subversive.conf");     // Expected in home dir
+        if (properties == null) properties = tryFile("subversive.conf");      // Expected in current directory
+        if (properties == null)
+            throw new ServiceException("Error loading configuration (/etc/subversive.conf or .subversive.conf)");
+        else
+            log.info("Configuration loaded from: " + properties.getFile());
+    }
+
+    private PropertiesConfiguration tryFile(String filename) {
         try {
-            Properties p = new Properties();
-            p.load(is);
-            properties = p;
-        } catch (IOException ex) {
-            throw new ServiceException("Error loading properties file: " + propertiesFile + ": " + ex.getMessage(), ex);
+            PropertiesConfiguration props = new PropertiesConfiguration(filename);
+            FileChangedReloadingStrategy reloading = new FileChangedReloadingStrategy();
+            reloading.setRefreshDelay(1000); // At most once every second
+            props.setReloadingStrategy(reloading);
+            return props;
+        } catch (ConfigurationException ex) {
+            log.warn("Can't load configuration file: " + filename);
+            return null;
         }
     }
 
@@ -237,8 +249,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
     private boolean isAdmin(String username, Configuration config) throws ServiceException {
         loadProperties();
 
-        String adminGroupName = properties.getProperty("subversive.admingroup");
-        if (adminGroupName == null) return false;
+        String adminGroupName = properties.getString("subversive.admingroup", "admins");
 
         return memberOf(username, new Group(adminGroupName), config);
     }
@@ -246,8 +257,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
     private boolean isOwner(String username, String repository, Configuration config) throws ServiceException {
         loadProperties();
 
-        String ownerGroupName = properties.getProperty("subversive.ownergroup");
-        if (ownerGroupName == null) return false;
+        String ownerGroupName = properties.getString("subversive.ownergroup", "owners");
 
         return memberOf(username, new Group(repository, ownerGroupName), config);
     }
@@ -261,42 +271,39 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
      * Load the configuration
      */
     private void initConfiguration() throws ServiceException {
-        if (configFile != null) return;
-
         loadProperties();
-        String fileName = properties.getProperty("subversion.access");
-        if (fileName == null) throw new ServiceException("Property file setting not found: subversion.access");
+        String fileName = properties.getString("subversion.accessfile");
+
+        if (fileName == null) throw new ServiceException("Property file setting not found: subversion.accessfile");
         File file = new File(fileName);
-        if (!file.exists()) throw new ServiceException("Configuration file not found: " + file);
-        if (!file.canWrite()) throw new ServiceException("Configuration file not writable: " + file);
+        if (!file.exists()) throw new ServiceException("Subversion configuration file not found: " + file);
+        if (!file.canWrite()) throw new ServiceException("Subversion configuration file not writable: " + file);
         configFile = file;
     }
 
     private void initUserAuthority() throws ServiceException {
         try {
-            if (userAuthority != null) return;
-
             loadProperties();
-            String htPasswdFile = properties.getProperty("auth.htpasswd");
+            String htPasswdFile = properties.getString("auth.htpasswd");
             if (htPasswdFile != null) {
                 userAuthority = new HtPasswdAuthority(new File(htPasswdFile));
                 return;
             }
 
-            String ldapUrl = properties.getProperty("auth.ldap.url");
+            String ldapUrl = properties.getString("auth.ldap.url");
             if (ldapUrl != null) {
                 LdapAuthority ldap = new LdapAuthority(ldapUrl);
 
-                String searchUser = properties.getProperty("auth.ldap.searchuserdn");
-                String searchPass = properties.getProperty("auth.ldap.searchpassword");
+                String searchUser = properties.getString("auth.ldap.searchuserdn");
+                String searchPass = properties.getString("auth.ldap.searchpassword");
                 if (searchUser != null && !searchUser.equals(""))
                     ldap.setSearchLogin(searchUser, searchPass);
 
-                String usernameField = properties.getProperty("auth.ldap.usernamefield");
+                String usernameField = properties.getString("auth.ldap.usernamefield");
                 if (usernameField != null && !usernameField.equals(""))
                     ldap.setUsernameField(usernameField);
 
-                String fullNameField = properties.getProperty("auth.ldap.fullnamefield");
+                String fullNameField = properties.getString("auth.ldap.fullnamefield");
                 if (fullNameField != null && !fullNameField.equals(""))
                     ldap.setFullNameFields(fullNameField);
 
@@ -312,9 +319,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements ConfigE
 
     private void initRepositoryLister() throws ServiceException {
         try {
-            if (repositoryLister != null) return;
-
-            String repoDir = properties.getProperty("subversion.repodir");
+            String repoDir = properties.getString("subversion.repodir");
             if (repoDir == null) throw new ServiceException("Property file: subversion.repodir not set.");
 
             repositoryLister = new RepositoryLister(new File(repoDir));

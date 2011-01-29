@@ -29,6 +29,10 @@ public class RepositoryLister {
         this.directory = directory;
     }
 
+    public File directory() {
+        return directory;
+    }
+
     public List<String> allRepositories() {
         String[] dirs = directory.list();
         List<String> ret = new ArrayList<String>(dirs.length);

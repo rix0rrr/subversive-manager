@@ -109,13 +109,18 @@ public class LdapAuthority implements CredentialsAuthority {
     public Collection<User> findUsers(String like) {
         List<User> ret = new ArrayList<User>();
 
-        List<Map<String, String>> results = new LDAP(url, searchUser, searchPass)
-                .search(like, interestingFields(), interestingFields());
+        LDAP ldap = new LDAP(url, searchUser, searchPass);
+        try {
+            List<Map<String, String>> results = ldap.search(like, interestingFields(), interestingFields());
 
-        for (Map<String, String> record: results)
-            ret.add(userFromMap(record));
+            for (Map<String, String> record: results)
+                ret.add(userFromMap(record));
 
-        return ret;
+            return ret;
+        } finally {
+            ldap.close();
+        }
+
     }
 
     /**
@@ -131,12 +136,16 @@ public class LdapAuthority implements CredentialsAuthority {
         List<User> ret = new ArrayList<User>();
 
         LDAP ldap = new LDAP(url, searchUser, searchPass);
-        for (User user: input) {
-            String dn = ldap.findUserDn(user.username(), usernameField);
-            if (!dn.equals(""))
-                ret.add(userFromMap(ldap.getProperties(dn, interestingFields())));
-        }
+        try {
+            for (User user: input) {
+                String dn = ldap.findUserDn(user.username(), usernameField);
+                if (!dn.equals(""))
+                    ret.add(userFromMap(ldap.getProperties(dn, interestingFields())));
+            }
 
-        return ret;
+            return ret;
+        } finally {
+            ldap.close();
+        }
     }
 }

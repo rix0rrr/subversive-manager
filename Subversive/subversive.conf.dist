@@ -1,0 +1,46 @@
+# Subversive configuration file
+
+#-------------------------------------------------
+#  Where are the Subversion files?
+#
+ 
+# Absolute path to the Subversion permissions file (svn_access.conf)
+subversion.accessfile=/var/svn/svn_access.conf
+# Absolute path to the directory containing all repositories
+subversion.repodir=/var/svn/
+
+#-------------------------------------------------
+#  How should users be authenticated?
+#
+#  User information can be drawn from either an .htpasswd file
+#  or an LDAP server. Uncomment the appropriate lines.
+#  
+
+# Absolute path to the .htpasswd file
+#auth.htpasswd=/var/svn/.htpasswd
+
+# LDAP URL, including root DN
+#auth.ldap.url=ldap://ldap.testathon.net:389/dc=testathon,dc=net
+ 
+# If the LDAP server does not allow anonymous searching, DN & password of a user
+# that can use search.
+#auth.ldap.searchuserdn=CN=stuart,OU=users,DC=testathon,DC=net
+#auth.ldap.searchpassword=stuart
+
+# Field in which usernames are stored (default 'uid')
+#auth.ldap.usernamefield=
+
+# List of field in which fullnames are stored (default 'fullname, full name, cn')
+#auth.ldap.fullnamefield=
+
+#-------------------------------------------------
+#  How should Subversive interpret groups?
+#
+ 
+# Name of the repository-specific group that contains the repository owners
+# (if this is "owners" members of the group "foo_owners" will be the owners 
+# of repository "foo").
+subversive.ownergroup=owners
+
+# The name of the global group that contains all users with administrative rights.
+subversive.admingroup=admins

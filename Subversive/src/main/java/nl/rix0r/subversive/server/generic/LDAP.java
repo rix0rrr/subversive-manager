@@ -222,9 +222,20 @@ public class LDAP {
      * password to authenticate them.
      */
     public static void validateCredentials(String url, String searchField, String username, String password, String searchUserDn, String searchPassword) {
-        String userDn = new LDAP(url, searchUserDn, searchPassword).findUserDn(username, searchField);
-        if (userDn.equals("")) throw new RuntimeException("Username not found: " + username);
-        new LDAP(url, userDn, password).authenticate();
+        LDAP searchLdap = new LDAP(url, searchUserDn, searchPassword);
+        try {
+            String userDn = searchLdap.findUserDn(username, searchField);
+            if (userDn.equals("")) throw new RuntimeException("Username not found: " + username);
+
+            LDAP authLdap = new LDAP(url, userDn, password);
+            try {
+                authLdap.authenticate();
+            } finally {
+                authLdap.close();
+            }
+        } finally {
+            searchLdap.close();
+        }
     }
 
     @Override
