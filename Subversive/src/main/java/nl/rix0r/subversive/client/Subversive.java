@@ -42,6 +42,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
         userRetrieval = new CachingUserRetrieval(userService);
 
         errorLabel.setStyleName("gwt-errorMessage");
+        errorLabel.setVisible(false);
     }
 
     public void onModuleLoad() {
@@ -150,6 +151,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
 
     public static void setError(String message) {
         errorLabel.setText(message);
+        errorLabel.setVisible(message != null && !message.equals(""));
     }
 
     abstract public static class Callback<T> implements AsyncCallback<T> {

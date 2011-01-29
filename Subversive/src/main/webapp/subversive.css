@@ -1,5 +1,95 @@
+/*-- General screen layout ------------------------------------------------------*/
+body {
+    background-color: #cbd8eb !important;
+    margin: 0;
+    padding: 0;
+}
+
+#header {
+    height: 60px;
+}
+
+#main {
+    position: relative;
+    width: 900px;
+    margin: 0 auto;
+    background-color: white;
+    min-height: 400px;
+    padding-bottom: 20px;
+}
+
+.logo {
+    position: absolute;
+    left: 100%;
+    margin-left: -110px;
+    top: 10px;
+}
+
+#app {
+    margin: 0px 20px;
+}
+
+.subversive-LoginDialog {
+    width: 220px;
+    margin: 50px auto;
+    border: solid 5px #cbd8eb;
+    background: #f4f8fd;
+    padding: 20px;
+    border-radius: 8px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+}
+
+.explanation {
+    color: #BBB;
+    margin-bottom: 2em;
+    font-size: 0.9em;
+    width: 600px;
+}
+
+h2 {
+    margin-bottom: 0px;
+}
+
+.subversive-RepoGrid {
+    margin: 2em 1em;
+}
+
+.buttons {
+    margin: 1em 2px;
+    overflow: auto;
+}
+
+.left {
+    float: left;
+    margin-right: 5px;
+}
+
+.right {
+    float: right;
+    margin-left: 5px;
+}
+
+.borderPanel {
+    width: auto;
+    border: solid 2px #92C1F0;
+    padding: 1px;
+}
+
+.subversive-GroupEditor .screenControls {
+    width: 650px;
+    margin: 0 auto;
+}
+
+.subversive-ResultDialog .screenControls {
+    width: 500px;
+    margin: 0 auto;
+}
+
+/*-- Some control styling -------------------------------------------------------*/
+
 .selected, .gwt-TreeItem-selected .gwt-treeRow {
-    background: #dbeaff;
+    background: #ffdbae;
     color: #002569;
 }
 
@@ -14,5 +104,23 @@
 }
 
 .gwt-errorMessage {
+    width: 400px;
+    position: absolute;
+    top: 0px;
+    left: 50%;
+
+    margin-left: -200px;
+    padding: 5px 20px;
+    background-color: #FFD1DD;
+    color: black;
+    font-weight: bold;
+
+    border-radius: 0px 0px 8px 8px;
+    -webkit-border-radius: 0px 0px 8px 8px;
+    -moz-border-radius: 0px 0px 8px 8px;
+}
+
+.applicationErrors {
     color: red;
+    margin: 1em 0;
 }

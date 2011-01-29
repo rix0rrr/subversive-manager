@@ -30,6 +30,8 @@ public class ResultDialog extends Composite implements HasCloseHandlers<Void> {
 
     public ResultDialog() {
         initWidget(uiBinder.createAndBindUi(this));
+
+        setStyleName("subversive-ResultDialog");
     }
 
     public HandlerRegistration addCloseHandler(CloseHandler<Void> handler) {

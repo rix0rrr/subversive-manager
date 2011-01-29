@@ -28,6 +28,9 @@ public class RepositoryList extends Composite {
     public RepositoryList(List<String> repositories) {
         initWidget(uiBinder.createAndBindUi(this));
 
+        repoList.setStyleName("subversive-RepoGrid");
+        setStyleName("subversive-RepositoryList");
+
         setRepositories(repositories);
     }
 

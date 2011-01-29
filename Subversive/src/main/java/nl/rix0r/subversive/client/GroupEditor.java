@@ -57,6 +57,8 @@ public class GroupEditor extends Composite implements HasCloseHandlers<Boolean> 
     public GroupEditor(CachingUserRetrieval retrieval) {
         initWidget(uiBinder.createAndBindUi(this));
         allUsers.setUserRetrieval(retrieval);
+
+        setStyleName("subversive-GroupEditor");
     }
 
     public void newGroup(String repository) {

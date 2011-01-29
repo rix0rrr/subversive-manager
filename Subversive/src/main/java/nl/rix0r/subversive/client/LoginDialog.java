@@ -31,6 +31,7 @@ public class LoginDialog extends Composite {
         initWidget(uiBinder.createAndBindUi(this));
 
         this.loginHandler = loginHandler;
+        setStyleName("subversive-LoginDialog");
     }
 
     @UiHandler("loginButton")

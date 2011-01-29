@@ -1,18 +1,19 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
     xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <ui:style>
-        .messages {
-            color: orange;
-        }
-    </ui:style>
 
     <g:HTMLPanel>
-        <g:Label ui:field="summary" />
+        <h2>Save Changes</h2>
+        <div class="explanation"></div>
 
-        <div class="{style.messages}">
-            <g:VerticalPanel ui:field="messages" />
+        <div class="screenControls">
+            <g:Label ui:field="summary" />
+
+            <div class="applicationErrors">
+                <g:VerticalPanel ui:field="messages" />
+            </div>
+
+            <div class="buttons">
+            </div> <g:Button ui:field="okButton">OK</g:Button>
         </div>
-
-        <g:Button ui:field="okButton">OK</g:Button>
     </g:HTMLPanel>
 </ui:UiBinder>

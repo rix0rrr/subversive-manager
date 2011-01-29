@@ -15,6 +15,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -208,6 +209,11 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     void undoButtonClicked(ClickEvent e) {
         editSession.undo();
         refresh();
+    }
+
+    @UiHandler("backButton")
+    void cancelClick(ClickEvent e) {
+        Window.Location.replace("#"); // Go back to the overview without leaving a history token
     }
 
     @UiHandler("removeButton")
