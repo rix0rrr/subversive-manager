@@ -4,7 +4,7 @@
     xmlns:s='urn:import:nl.rix0r.subversive.client'>
 
     <g:HTMLPanel>
-        <h2>Group Editor</h2>
+        <h2>Edit Group</h2>
 
         <div>Group Name</div>
         <g:TextBox ui:field="groupName" width="300px">New Group</g:TextBox>
