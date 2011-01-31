@@ -1,4 +1,3 @@
-
 package nl.rix0r.subversive.server;
 
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -191,14 +190,31 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
     }
 
     /**
-     * Read the properties file
+     * Read the configuration properties file
+     *
+     * Tries to find the file in the following locations:
+     *
+     * 1. In a location specified by the subversive.configuration property
+     * 2. .subsersive.conf in the user's home directory
+     * 3. subversive.conf in the $TOMCAT/conf directory
+     * 4. /etc/subsersive.conf
+     * 5. subversive.conf anywhere on the class path
      */
     private void loadProperties() throws ServiceException {
         if (properties != null) return;
 
-        if (properties == null) properties = tryFile("/etc/subversive.conf"); // System-wide
-        if (properties == null) properties = tryFile(".subversive.conf");     // Expected in home dir
-        if (properties == null) properties = tryFile("subversive.conf");      // Expected in current directory
+        String optionsFile = System.getProperty("subversive.configuration");
+        if (optionsFile != null && !optionsFile.equals("")) properties = tryFile(optionsFile);
+
+
+        if (properties == null) properties = tryFile(".subversive.conf");
+        if (properties == null) {
+            String catalinaBase = System.getProperty("catalina.base");
+            if (catalinaBase == null || catalinaBase.equals("")) catalinaBase = System.getProperty("catalina.home");
+            if (catalinaBase != null && !catalinaBase.equals("")) properties = tryFile(catalinaBase + "/conf/subversive.conf");
+        }
+        if (properties == null) properties = tryFile("/etc/subversive.conf");
+        if (properties == null) properties = tryFile("subversive.conf");
         if (properties == null)
             throw new ServiceException("Error loading configuration (/etc/subversive.conf or .subversive.conf)");
         else
