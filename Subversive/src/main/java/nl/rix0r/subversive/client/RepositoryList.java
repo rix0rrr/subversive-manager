@@ -13,6 +13,8 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -36,6 +38,12 @@ public class RepositoryList extends Composite {
 
     public void setRepositories(List<String> repositories) {
         repoList.clear();
+
+        Collections.sort(repositories, new Comparator<String>() {
+            public int compare(String o1, String o2) {
+                return o1.toLowerCase().compareTo(o2.toLowerCase());
+            }
+        });
 
         for (String repository: repositories) {
             Hyperlink h = new Hyperlink(repository, repository);
