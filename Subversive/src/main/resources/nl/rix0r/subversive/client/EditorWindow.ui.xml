@@ -1,0 +1,85 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+    xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:s='urn:import:nl.rix0r.subversive.client'>
+
+    <ui:with field="res" type="nl.rix0r.subversive.client.Resources"/>
+    <ui:style>
+        .relpos { position: relative; }
+        .right {
+            position: absolute;
+            left: 100% !important;
+            margin-left: -20px !important;
+            margin-top: 4px !important;
+            z-index: 100;
+        }
+    </ui:style>
+
+
+    <g:HTMLPanel>
+        <h2><g:Label ui:field="repoTitle" /></h2>
+        <div class="explanation">Review and change permissions of this repository. You can
+        assign and remove permissions for users and groups, and edit the group structure for this
+        repository as well. Click <em>Save</em> to save your changes.</div>
+
+        <div class="buttons">
+            <g:Button ui:field="undoButton" addStyleNames="right">Undo</g:Button>
+        </div>
+        <table valign="top" width="100%">
+            <tr>
+                <td>
+                    Directories
+                    <div class="borderPanel">
+                        <g:HTMLPanel styleName="{style.relpos}">
+                            <g:Image ui:field="alertImage" resource="{res.warningImage}" styleName="{style.right}" visible="false" />
+                            <s:DirectoryTree ui:field="directoryTree" width="250px" height="400px" />
+                        </g:HTMLPanel>
+                    </div>
+                </td>
+                <td>
+                    <g:Label ui:field="selectedDirectory" />
+                    <div class="borderPanel">
+                        <g:ScrollPanel width="250px" height="400px">
+                            <s:PermissionsList ui:field="permissions" width="100%" />
+                        </g:ScrollPanel>
+                    </div>
+                </td>
+                <td valign="middle">
+                    <g:Button width="100%" ui:field="assignButton">&lt; Assign</g:Button><br />
+                    <g:Button width="100%" ui:field="anonymousButton">&lt; Anonymous</g:Button><br />
+                    <g:Button width="100%" ui:field="removeButton">Remove &gt;</g:Button>
+                </td>
+                <td align="right">
+                    <g:TabLayoutPanel width="200px" height="430px" barUnit="EM" barHeight="1.5" ui:field="tabpanel">
+                        <g:tab>
+                            <g:header>Groups</g:header>
+                            <g:DockLayoutPanel unit="EM">
+                                <g:center>
+                                    <s:GroupList ui:field="groups" />
+                                </g:center>
+                                <g:south size="2">
+                                    <g:HTMLPanel>
+                                        <center>
+                                            <g:Button ui:field="newGroupButton">New</g:Button>
+                                            <g:Button ui:field="editGroupButton">Edit</g:Button>
+                                            <g:Button ui:field="deleteGroupButton">Delete</g:Button>
+                                        </center>
+                                    </g:HTMLPanel>
+                                </g:south>
+                            </g:DockLayoutPanel>
+                        </g:tab>
+                        <g:tab>
+                            <g:header>Users</g:header>
+                            <s:UserList ui:field="users" />
+                        </g:tab>
+                    </g:TabLayoutPanel>
+                </td>
+            </tr>
+        </table>
+
+        <div class="buttons">
+            <g:Button ui:field="backButton">&laquo; Back</g:Button>
+            <g:Button ui:field="saveButton" addStyleNames="right">Save</g:Button>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

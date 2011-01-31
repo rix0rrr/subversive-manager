@@ -1,0 +1,42 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+    xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:s='urn:import:nl.rix0r.subversive.client'>
+
+    <g:HTMLPanel>
+        <h2>Edit Group</h2>
+        <div class="explanation">Add and remove users from this group, or change its name.</div>
+
+        <div class="screenControls">
+
+            <div>Group Name</div>
+            <g:TextBox ui:field="groupName" width="300px">New Group</g:TextBox>
+
+            <table valign="top" width="100%">
+                <tr>
+                    <td>
+                        In this group
+                        <div class="borderPanel">
+                            <s:UserList ui:field="groupUsers" width="100%" height="300px" />
+                        </div>
+                    </td>
+                    <td valign="middle" align="center" width="100px">
+                        <g:Button width="100%" ui:field="assignButton">&lt; Add</g:Button><br />
+                        <g:Button width="100%" ui:field="removeButton">Remove &gt;</g:Button>
+                    </td>
+                    <td>
+                        Available
+                        <div class="borderPanel">
+                            <s:UserList ui:field="allUsers" width="100%" height="300px" />
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="buttons">
+                <g:Button ui:field="saveButton" addStyleNames="right">Save</g:Button>
+                <g:Button ui:field="cancelButton" addStyleNames="left">Cancel</g:Button>
+            </div>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

@@ -1,0 +1,14 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+    xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <g:HTMLPanel>
+        <h2>Your Repositories</h2>
+        <div class="explanation">A list of your repositories. Click one to manage its access rights.</div>
+
+        <div class="screenControls">
+            <g:VerticalPanel ui:field="repoList" />
+
+            <g:Button ui:field="refreshButton">Refresh List</g:Button>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

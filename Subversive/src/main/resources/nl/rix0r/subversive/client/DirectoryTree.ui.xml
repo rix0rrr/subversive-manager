@@ -1,0 +1,15 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+    xmlns:g='urn:import:com.google.gwt.user.client.ui'
+    xmlns:ss='urn:import:nl.rix0r.subversive.client.generic'>
+
+    <g:DockLayoutPanel unit="EM">
+        <g:center>
+            <g:ScrollPanel width="100%">
+                <g:Tree ui:field="tree" />
+            </g:ScrollPanel>
+        </g:center>
+        <g:south size="2">
+            <ss:HintTextBox ui:field="customDirField" hint="Unlisted directory..." />
+        </g:south>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

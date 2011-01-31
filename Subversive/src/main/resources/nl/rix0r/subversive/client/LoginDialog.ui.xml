@@ -1,0 +1,19 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+    xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <g:HTMLPanel>
+        <table>
+            <tr>
+                <td align="right">User name</td>
+                <td><g:TextBox ui:field="username" /></td>
+            </tr>
+            <tr>
+                <td align="right">Password</td>
+                <td><g:PasswordTextBox ui:field="password" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><g:Button ui:field="loginButton">Log in</g:Button></td>
+            </tr>
+        </table>
+    </g:HTMLPanel>
+</ui:UiBinder>
