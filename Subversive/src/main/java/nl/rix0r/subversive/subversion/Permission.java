@@ -43,6 +43,10 @@ public class Permission implements Comparable, Serializable {
         return principal;
     }
 
+    public Permission change(Principal principal) {
+        return new Permission(directory, principal, access);
+    }
+
     public boolean appliesToRepository(String repository) {
         return directory.appliesToRepository(repository);
     }
