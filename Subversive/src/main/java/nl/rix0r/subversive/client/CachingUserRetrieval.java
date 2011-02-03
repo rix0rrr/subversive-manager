@@ -33,6 +33,11 @@ public class CachingUserRetrieval implements HasValueChangeHandlers<Void> {
     private Set<User>  requestedUsers = new HashSet<User>();
     private Set<User>    pendingUsers = new HashSet<User>();
 
+    // Bookkeeping for findUsers
+    private String fetchStartedQuery;
+    private String latestQuery;
+    private boolean loading;
+
     private String username;
     private String password;
 
