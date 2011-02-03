@@ -26,9 +26,17 @@ public class CachingUserRetrieval implements HasValueChangeHandlers<Void> {
     private UserRetrievalServiceAsync remote;
     private HandlerManager handlerManager = new HandlerManager(this);
 
+    // Users that we've already seen
     private Map<User, User> seenUsers = new HashMap<User, User>();
+
+    // Bookkeeping for expandUsers
     private Set<User>  requestedUsers = new HashSet<User>();
     private Set<User>    pendingUsers = new HashSet<User>();
+
+    // Bookkeeping for findUsers
+    private boolean loading = false;
+    private String  fetchStartedQuery;
+    private String  latestQuery;
 
     public CachingUserRetrieval(UserRetrievalServiceAsync remote) {
         this.remote = remote;
@@ -59,20 +67,37 @@ public class CachingUserRetrieval implements HasValueChangeHandlers<Void> {
      * Beware that the callback may be fired multiple times: once for the
      * information that can be retrieved quickly and once for the information
      * that is fetched from the remote server.
+     *
+     * Returns true if this call has started a new request. In that case, the
+     * current database should be cleared.
      */
-    public void findUsers(String like, AsyncCallback<Collection<User>> whenFound) {
+    public void findUsers(String like, final AsyncCallback<Collection<User>> whenFound) {
+        latestQuery = like;
+        if (loading) return;
+
         final Collection<User> quickResponse = quickFind(like);
         if (!quickResponse.isEmpty()) whenFound.onSuccess(quickResponse);
 
+        fetchStartedQuery = like;
+        loading = true;
         remote.findUsers(like, new AsyncFilter<Collection<User>>(whenFound) {
             @Override
             protected Collection<User> filter(Collection<User> result) {
                 remember(result);
                 // Return only what wasn't yet in the quick response
                 result.removeAll(quickResponse);
+                loading = false;
+
+                if (!fetchStartedQuery.equals(latestQuery))
+                    findUsers(latestQuery, whenFound);
+
                 return result;
             }
         });
+    }
+
+    public boolean willStartNewSearch() {
+        return !loading;
     }
 
     public void initialUserSet(AsyncCallback<Collection<User>> callback) {
