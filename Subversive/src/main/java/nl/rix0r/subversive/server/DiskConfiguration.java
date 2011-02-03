@@ -290,19 +290,21 @@ public class DiskConfiguration extends Configuration {
     }
 
     private static class ConfigGroup extends ConfigEntity {
+        private static String groupSeparator = ".";
+
         /**
          * Construct a Group instance from a "repo_group" name
          */
         protected static Group deserialize(String name) {
-            String[] parts = name.split("_", 2);
+            String[] parts = name.split(Pattern.quote(groupSeparator), 2);
 
-            if (parts.length == 1) return new Group(decode(parts[0]));
+            if (parts.length == 1) return new Group(parts[0]);
             return new Group(decode(parts[0]), decode(parts[1]));
         }
 
         protected static String serialize(Group group) {
             if (group.global()) return encode(group.name());
-            return encode(group.repository()) + "_" + encode(group.name());
+            return group.repository() + groupSeparator + encode(group.name());
         }
     }
 
@@ -326,17 +328,10 @@ public class DiskConfiguration extends Configuration {
         }
 
         protected static String serialize(Principal principal) {
-            if (principal instanceof Group) return serializeGroupReference((Group)principal);
+            if (principal instanceof Group) return "@" + ConfigGroup.serialize((Group)principal);
             if (principal instanceof Anonymous) return "*";
             assert principal instanceof User;
             return encode(((User)principal).username());
-        }
-
-        private static String serializeGroupReference(Group group) {
-            if (group.global())
-                return "@" + encode(group.name());
-            else
-                return "@" + encode(group.repository()) + "_" + encode(group.name());
         }
     }
 
