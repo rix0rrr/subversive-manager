@@ -34,13 +34,9 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
     private final static int invalidPasswordSleep = 2000;
     private final static Logger log = Logger.getLogger(ConfigEditorServlet.class);
 
-    private PropertiesConfiguration properties;
-    private File configFile;
-    private CredentialsAuthority userAuthority;
-    private RepositoryLister repositoryLister;
+    private PropertiesConfiguration _properties;
 
     public synchronized List<String> apply(List<Modification> modifications, String username, String password) throws ServiceException {
-        initialize();
         authenticate(username, password);
 
         FileChannel channel = null;
@@ -49,6 +45,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
         List<String> errors = new ArrayList<String>();
         try {
             // Acquire lock on the file
+            File configFile = svnFile();
             channel = new RandomAccessFile(configFile, "rw").getChannel();
             lock    = channel.lock();
 
@@ -100,10 +97,9 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
 
     public synchronized EditSession begin(String repository, String username, String password) throws ServiceException {
         try {
-            initialize();
             authenticate(username, password);
 
-            DiskConfiguration config = new DiskConfiguration(configFile);
+            DiskConfiguration config = new DiskConfiguration(svnFile());
             config.load();
 
             verifyCanManage(username, repository, config);
@@ -116,15 +112,14 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
 
     public List<Directory> listDirectories(String repository, String username, String password) throws ServiceException {
         try {
-            initialize();
             authenticate(username, password);
 
-            DiskConfiguration config = new DiskConfiguration(configFile);
+            DiskConfiguration config = new DiskConfiguration(svnFile());
             config.load();
 
             verifyCanManage(username, repository, config);
 
-            return repositoryLister.listDirectories(repository);
+            return repositoryLister().listDirectories(repository);
         } catch (Exception ex) {
             throw new ServiceException(ex);
         }
@@ -132,15 +127,14 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
 
 
     public List<String> myRepositories(String username, String password) throws ServiceException {
-        initialize();
         authenticate(username, password);
 
         try {
-            DiskConfiguration config = new DiskConfiguration(configFile);
+            DiskConfiguration config = new DiskConfiguration(svnFile());
             config.load();
 
             List<String> ret = new ArrayList<String>();
-            for (String repo: repositoryLister.allRepositories())
+            for (String repo: repositoryLister().allRepositories())
                 if (canManage(username, repo, config))
                     ret.add(repo);
 
@@ -152,10 +146,9 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
 
     public Collection<User> findUsers(String like, String username, String password) throws ServiceException {
         try {
-            initialize();
+            CredentialsAuthority userAuthority = userAuthority();
             if (userAuthority == null) return new ArrayList<User>(); // None
 
-            // FIXME: Hax and race condition!
             if (userAuthority instanceof LdapAuthority) ((LdapAuthority)userAuthority).otherSearchLogin(username, password);
             log.debug("Searching for: " + like + " (on behalf of " + username + ")");
             Collection<User> ret = userAuthority.findUsers(like);
@@ -169,7 +162,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
 
     public Collection<User> initialUserSet() throws ServiceException {
         try {
-            initialize();
+            CredentialsAuthority userAuthority = userAuthority();
             if (userAuthority == null) return new ArrayList<User>(); // None
             return userAuthority.initialSet();
         } catch (Exception ex) {
@@ -180,22 +173,15 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
 
     public Collection<User> expandInfo(Collection<User> input, String username, String password) throws ServiceException {
         try {
-            initialize();
+            CredentialsAuthority userAuthority = userAuthority();
             if (userAuthority == null) return new ArrayList<User>(); // None
 
-            // FIXME: Hax and race condition!
             if (userAuthority instanceof LdapAuthority) ((LdapAuthority)userAuthority).otherSearchLogin(username, password);
             return userAuthority.expandInfo(input);
         } catch (Exception ex) {
             log.warn(ex.getMessage(), ex);
             return input;
         }
-    }
-
-    private void initialize() throws ServiceException {
-        initConfiguration();
-        initUserAuthority();
-        initRepositoryLister();
     }
 
     /**
@@ -209,25 +195,26 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
      * 4. /etc/subsersive.conf
      * 5. subversive.conf anywhere on the class path
      */
-    private void loadProperties() throws ServiceException {
-        if (properties != null) return;
+    private PropertiesConfiguration properties() throws ServiceException {
+        if (_properties == null) {
+            String optionsFile = System.getProperty("subversive.configuration");
+            if (optionsFile != null && !optionsFile.equals("")) _properties = tryFile(optionsFile);
 
-        String optionsFile = System.getProperty("subversive.configuration");
-        if (optionsFile != null && !optionsFile.equals("")) properties = tryFile(optionsFile);
-
-
-        if (properties == null) properties = tryFile(".subversive.conf");
-        if (properties == null) {
-            String catalinaBase = System.getProperty("catalina.base");
-            if (catalinaBase == null || catalinaBase.equals("")) catalinaBase = System.getProperty("catalina.home");
-            if (catalinaBase != null && !catalinaBase.equals("")) properties = tryFile(catalinaBase + "/conf/subversive.conf");
+            if (_properties == null) _properties = tryFile(".subversive.conf");
+            if (_properties == null) {
+                String catalinaBase = System.getProperty("catalina.base");
+                if (catalinaBase == null || catalinaBase.equals("")) catalinaBase = System.getProperty("catalina.home");
+                if (catalinaBase != null && !catalinaBase.equals("")) _properties = tryFile(catalinaBase + "/conf/subversive.conf");
+            }
+            if (_properties == null) _properties = tryFile("/etc/subversive.conf");
+            if (_properties == null) _properties = tryFile("subversive.conf");
+            if (_properties == null)
+                throw new ServiceException("Error loading configuration (/etc/subversive.conf or .subversive.conf)");
+            else
+                log.info("Configuration loaded from: " + _properties.getFile());
         }
-        if (properties == null) properties = tryFile("/etc/subversive.conf");
-        if (properties == null) properties = tryFile("subversive.conf");
-        if (properties == null)
-            throw new ServiceException("Error loading configuration (/etc/subversive.conf or .subversive.conf)");
-        else
-            log.info("Configuration loaded from: " + properties.getFile());
+
+        return _properties;
     }
 
     private PropertiesConfiguration tryFile(String filename) {
@@ -251,6 +238,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
      * but that's better than the alternative.
      */
     private void authenticate(String username, String password) throws ServiceException {
+        CredentialsAuthority userAuthority = userAuthority();
         if (userAuthority == null)
             throw new ServiceException("No authentication mechanism specified, and no credentials passed by proxy. Check the configuration.");
 
@@ -283,17 +271,13 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
      * a member of this group.
      */
     private boolean isAdmin(String username, Configuration config) throws ServiceException {
-        loadProperties();
-
-        String adminGroupName = properties.getString("subversive.admingroup", "admins");
+        String adminGroupName = properties().getString("subversive.admingroup", "admins");
 
         return memberOf(username, new Group(adminGroupName), config);
     }
 
     private boolean isOwner(String username, String repository, Configuration config) throws ServiceException {
-        loadProperties();
-
-        String ownerGroupName = properties.getString("subversive.ownergroup", "owners");
+        String ownerGroupName = properties().getString("subversive.ownergroup", "owners");
 
         return memberOf(username, new Group(repository, ownerGroupName), config);
     }
@@ -306,59 +290,54 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
     /**
      * Load the configuration
      */
-    private void initConfiguration() throws ServiceException {
-        loadProperties();
-        String fileName = properties.getString("subversion.accessfile");
+    private File svnFile() throws ServiceException {
+        String fileName = properties().getString("subversion.accessfile");
 
         if (fileName == null) throw new ServiceException("Property file setting not found: subversion.accessfile");
         File file = new File(fileName);
         if (!file.exists()) throw new ServiceException("Subversion configuration file not found: " + file);
         if (!file.canWrite()) throw new ServiceException("Subversion configuration file not writable: " + file);
-        configFile = file;
+        return file;
     }
 
-    private void initUserAuthority() throws ServiceException {
+    private CredentialsAuthority userAuthority() throws ServiceException {
         try {
-            loadProperties();
-            String htPasswdFile = properties.getString("auth.htpasswd");
-            if (htPasswdFile != null) {
-                userAuthority = new HtPasswdAuthority(new File(htPasswdFile));
-                return;
-            }
+            String htPasswdFile = properties().getString("auth.htpasswd");
+            if (htPasswdFile != null)
+                return new HtPasswdAuthority(new File(htPasswdFile));
 
-            String ldapUrl = properties.getString("auth.ldap.url");
+            String ldapUrl = properties().getString("auth.ldap.url");
             if (ldapUrl != null) {
                 LdapAuthority ldap = new LdapAuthority(ldapUrl);
 
-                String searchUser = properties.getString("auth.ldap.searchuserdn");
-                String searchPass = properties.getString("auth.ldap.searchpassword");
+                String searchUser = properties().getString("auth.ldap.searchuserdn");
+                String searchPass = properties().getString("auth.ldap.searchpassword");
                 if (searchUser != null && !searchUser.equals(""))
                     ldap.setSearchLogin(searchUser, searchPass);
 
-                String usernameField = properties.getString("auth.ldap.usernamefield");
+                String usernameField = properties().getString("auth.ldap.usernamefield");
                 if (usernameField != null && !usernameField.equals(""))
                     ldap.setUsernameField(usernameField);
 
-                String fullNameField = properties.getString("auth.ldap.fullnamefield");
+                String fullNameField = properties().getString("auth.ldap.fullnamefield");
                 if (fullNameField != null && !fullNameField.equals(""))
                     ldap.setFullNameFields(fullNameField);
 
-                userAuthority = ldap;
-                return;
+                return ldap;
             }
 
-            userAuthority = null;
+            return null;
         } catch (Exception ex) {
             throw new ServiceException(ex);
         }
     }
 
-    private void initRepositoryLister() throws ServiceException {
+    private RepositoryLister repositoryLister() throws ServiceException {
         try {
-            String repoDir = properties.getString("subversion.repodir");
+            String repoDir = properties().getString("subversion.repodir");
             if (repoDir == null) throw new ServiceException("Property file: subversion.repodir not set.");
 
-            repositoryLister = new RepositoryLister(new File(repoDir));
+            return new RepositoryLister(new File(repoDir));
         } catch (Exception ex) {
             throw new ServiceException(ex);
         }
@@ -369,10 +348,9 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
      */
     public String[] getBrandingImage() {
         try {
-            initialize();
             return new String[] {
-                properties.getString("subversive.brandingimage", ""),
-                properties.getString("subversive.brandinglink", "")
+                properties().getString("subversive.brandingimage", ""),
+                properties().getString("subversive.brandinglink", "")
             };
         } catch (Exception ex) {
             log.warn("Error retrieving branding image", ex);
