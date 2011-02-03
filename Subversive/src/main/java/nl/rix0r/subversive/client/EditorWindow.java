@@ -53,6 +53,10 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     interface MyUiBinder extends UiBinder<Widget, EditorWindow> { };
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
+    private enum Tab {
+        Users, Groups
+    }
+
     @UiField Button saveButton;
     @UiField Button undoButton;
     @UiField PermissionsList permissions;
@@ -116,6 +120,14 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         refreshButtonStates();
     }
 
+    private Tab selectedTab() {
+        int ix = tabpanel.getSelectedIndex();
+        if (tabpanel.getTabWidget(ix).getTitle().toLowerCase().startsWith("group"))
+            return Tab.Groups;
+        else
+            return Tab.Users;
+    }
+
     /**
      * Refresh button states (enabled or disabled)
      *
@@ -126,7 +138,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
 
         undoButton.setEnabled(editSession.canUndo());
         assignButton.setEnabled(
-                (tabpanel.getSelectedIndex() == 0 && users.selected() != null && !permissions.containsPrincipal(users.selected()))
+                (selectedTab() == Tab.Users && users.selected() != null && !permissions.containsPrincipal(users.selected()))
                 || (groups.selected() != null && !permissions.containsPrincipal(groups.selected())));
         anonymousButton.setEnabled(!permissions.containsPrincipal(new Anonymous()));
         removeButton.setEnabled(permissions.selected() != null);
@@ -224,7 +236,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
 
     @UiHandler("assignButton")
     void handleAssignClick(ClickEvent e) {
-        if (tabpanel.getSelectedIndex() == 0)
+        if (selectedTab() == Tab.Users)
             grantNewPermissions(users.selected());
         else
             grantNewPermissions(groups.selected());

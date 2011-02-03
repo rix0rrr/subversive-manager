@@ -70,6 +70,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     public void tryLogin(String username, String password) {
         this.username = username;
         this.password = password;
+        userRetrieval.setLogin(username, password);
 
         dispatchOnToken(History.getToken());
     }
