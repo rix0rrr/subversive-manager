@@ -19,7 +19,7 @@ public class CachingUserRetrievalTest {
     boolean finished = false;
 
     private CachingUserRetrieval userRetrieval = new CachingUserRetrieval(new UserRetrievalServiceAsync() {
-        public void findUsers(String like, AsyncCallback<Collection<User>> callback) {
+        public void findUsers(String like, String u, String p, AsyncCallback<Collection<User>> callback) {
             fetchCount++;
             latestSearch = like;
             findCallback = callback;
@@ -28,7 +28,7 @@ public class CachingUserRetrievalTest {
         public void initialUserSet(AsyncCallback<Collection<User>> callback) {
         }
 
-        public void expandInfo(Collection<User> input, AsyncCallback<Collection<User>> callback) {
+        public void expandInfo(Collection<User> input, String u, String p, AsyncCallback<Collection<User>> callback) {
         }
     });
 
