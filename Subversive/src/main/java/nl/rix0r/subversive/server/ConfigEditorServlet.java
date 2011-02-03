@@ -150,11 +150,17 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
         }
     }
 
-    public Collection<User> findUsers(String like) throws ServiceException {
+    public Collection<User> findUsers(String like, String username, String password) throws ServiceException {
         try {
             initialize();
             if (userAuthority == null) return new ArrayList<User>(); // None
-            return userAuthority.findUsers(like);
+
+            // FIXME: Hax and race condition!
+            if (userAuthority instanceof LdapAuthority) ((LdapAuthority)userAuthority).otherSearchLogin(username, password);
+            log.debug("Searching for: " + like + " (on behalf of " + username + ")");
+            Collection<User> ret = userAuthority.findUsers(like);
+            log.debug("Result: " + ret);
+            return ret;
         } catch (Exception ex) {
             log.warn(ex.getMessage(), ex);
             throw new ServiceException(ex);
@@ -172,10 +178,13 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
         }
     }
 
-    public Collection<User> expandInfo(Collection<User> input) throws ServiceException {
+    public Collection<User> expandInfo(Collection<User> input, String username, String password) throws ServiceException {
         try {
             initialize();
             if (userAuthority == null) return new ArrayList<User>(); // None
+
+            // FIXME: Hax and race condition!
+            if (userAuthority instanceof LdapAuthority) ((LdapAuthority)userAuthority).otherSearchLogin(username, password);
             return userAuthority.expandInfo(input);
         } catch (Exception ex) {
             log.warn(ex.getMessage(), ex);

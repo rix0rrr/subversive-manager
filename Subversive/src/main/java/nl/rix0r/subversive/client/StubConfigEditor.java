@@ -92,7 +92,7 @@ public class StubConfigEditor implements ConfigEditorServiceAsync, UserRetrieval
         callback.onSuccess(new ArrayList<User>(allUsers));
     }
 
-    public void findUsers(String like, AsyncCallback<Collection<User>> callback) {
+    public void findUsers(String like, String u, String p, AsyncCallback<Collection<User>> callback) {
         List<User> ret = new ArrayList<User>();
         for (User user: allUsers)
             if (user.matches(like))
@@ -101,7 +101,7 @@ public class StubConfigEditor implements ConfigEditorServiceAsync, UserRetrieval
         callback.onSuccess(ret);
     }
 
-    public void expandInfo(Collection<User> p0, AsyncCallback<Collection<User>> callback) {
+    public void expandInfo(Collection<User> p0, String u, String p, AsyncCallback<Collection<User>> callback) {
         callback.onSuccess(p0);
     }
 

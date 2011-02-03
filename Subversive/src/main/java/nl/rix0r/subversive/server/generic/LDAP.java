@@ -1,7 +1,5 @@
 package nl.rix0r.subversive.server.generic;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -10,6 +8,7 @@ import java.util.Map;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.SizeLimitExceededException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
@@ -184,13 +183,17 @@ public class LDAP {
 
             List<Map<String, String>> ret = new ArrayList<Map<String, String>>();
 
-            while (answer.hasMore()) {
-                SearchResult sr = (SearchResult)answer.next();
-                String dn       = sr.getNameInNamespace();
+            try {
+                while (answer.hasMore()) {
+                    SearchResult sr = (SearchResult)answer.next();
+                    String dn       = sr.getNameInNamespace();
 
-                Map<String, String> props = makeMap(sr.getAttributes(), properties);
-                props.put("dn", dn != null ? dn : "");
-                ret.add(props);
+                    Map<String, String> props = makeMap(sr.getAttributes(), properties);
+                    props.put("dn", dn != null ? dn : "");
+                    ret.add(props);
+                }
+            } catch (SizeLimitExceededException ex) {
+                // No worries
             }
 
             return ret;

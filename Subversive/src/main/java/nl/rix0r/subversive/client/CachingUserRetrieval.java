@@ -33,13 +33,16 @@ public class CachingUserRetrieval implements HasValueChangeHandlers<Void> {
     private Set<User>  requestedUsers = new HashSet<User>();
     private Set<User>    pendingUsers = new HashSet<User>();
 
-    // Bookkeeping for findUsers
-    private boolean loading = false;
-    private String  fetchStartedQuery;
-    private String  latestQuery;
+    private String username;
+    private String password;
 
     public CachingUserRetrieval(UserRetrievalServiceAsync remote) {
         this.remote = remote;
+    }
+
+    public void setLogin(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
     /**
@@ -78,9 +81,7 @@ public class CachingUserRetrieval implements HasValueChangeHandlers<Void> {
         final Collection<User> quickResponse = quickFind(like);
         if (!quickResponse.isEmpty()) whenFound.onSuccess(quickResponse);
 
-        fetchStartedQuery = like;
-        loading = true;
-        remote.findUsers(like, new AsyncFilter<Collection<User>>(whenFound) {
+        remote.findUsers(like, username, password, new AsyncFilter<Collection<User>>(whenFound) {
             @Override
             protected Collection<User> filter(Collection<User> result) {
                 remember(result);
@@ -140,7 +141,7 @@ public class CachingUserRetrieval implements HasValueChangeHandlers<Void> {
      */
     public void finished() {
         if (!pendingUsers.isEmpty()) {
-            remote.expandInfo(pendingUsers, usersRetrieved);
+            remote.expandInfo(pendingUsers, username, password, usersRetrieved);
             pendingUsers.clear();
         }
     }

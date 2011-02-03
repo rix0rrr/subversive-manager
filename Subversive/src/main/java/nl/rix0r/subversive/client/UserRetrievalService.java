@@ -15,7 +15,7 @@ public interface UserRetrievalService extends RemoteService {
     /**
      * Find available users with a name like the given string
      */
-    public Collection<User> findUsers(String like) throws ServiceException;
+    public Collection<User> findUsers(String like, String username, String password) throws ServiceException;
 
     /**
      * Return the initial set of users
@@ -31,5 +31,5 @@ public interface UserRetrievalService extends RemoteService {
      *
      * Add fullname information if all you've got is usernames.
      */
-    public Collection<User> expandInfo(Collection<User> input) throws ServiceException;
+    public Collection<User> expandInfo(Collection<User> input, String username, String password) throws ServiceException;
 }

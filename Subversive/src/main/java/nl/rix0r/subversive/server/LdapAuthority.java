@@ -31,7 +31,7 @@ public class LdapAuthority implements CredentialsAuthority {
     private static final Logger log = Logger.getLogger(LdapAuthority.class);
 
     private String url;
-    private String searchUser;
+    private String searchDn;
     private String searchPass;
     private String usernameField  = "uid";
     private String fullNameFields = "fullname, cn";
@@ -40,9 +40,18 @@ public class LdapAuthority implements CredentialsAuthority {
         this.url = url;
     }
 
-    public void setSearchLogin(String username, String password) {
-        this.searchUser = username;
+    public void setSearchLogin(String searchDn, String password) {
+        this.searchDn = searchDn;
         this.searchPass = password;
+    }
+
+    public void otherSearchLogin(String username, String password) {
+        if ((searchDn == null || searchDn.equals(""))
+        && !(username == null || username.equals(""))) {
+            searchDn   = findDn(username);
+            searchPass = password;
+            log.debug("Using " + searchDn + " for search.");
+        }
     }
 
     public void setUsernameField(String usernameField) {
@@ -53,6 +62,15 @@ public class LdapAuthority implements CredentialsAuthority {
         this.fullNameFields = fullNameFields;
     }
 
+    private String findDn(String username) {
+        LDAP ldap = new LDAP(url, searchDn, searchPass);
+        try {
+            return ldap.findUserDn(username, usernameField);
+        } finally {
+            ldap.close();
+        }
+    }
+
     /**
      * Authenticate the user, return true or false
      *
@@ -60,7 +78,7 @@ public class LdapAuthority implements CredentialsAuthority {
      */
     public boolean authenticate(String username, String password) {
         try {
-            LDAP.validateCredentials(url, usernameField, username, password, searchUser, searchPass);
+            LDAP.validateCredentials(url, usernameField, username, password, searchDn, searchPass);
             return true;
         } catch (RuntimeException ex) {
             log.warn(ex.getMessage(), ex);
@@ -109,7 +127,7 @@ public class LdapAuthority implements CredentialsAuthority {
     public Collection<User> findUsers(String like) {
         List<User> ret = new ArrayList<User>();
 
-        LDAP ldap = new LDAP(url, searchUser, searchPass);
+        LDAP ldap = new LDAP(url, searchDn, searchPass);
         try {
             List<Map<String, String>> results = ldap.search(like, interestingFields(), interestingFields());
 
@@ -135,7 +153,7 @@ public class LdapAuthority implements CredentialsAuthority {
     public Collection<User> expandInfo(Collection<User> input) {
         List<User> ret = new ArrayList<User>();
 
-        LDAP ldap = new LDAP(url, searchUser, searchPass);
+        LDAP ldap = new LDAP(url, searchDn, searchPass);
         try {
             for (User user: input) {
                 String dn = ldap.findUserDn(user.username(), usernameField);
