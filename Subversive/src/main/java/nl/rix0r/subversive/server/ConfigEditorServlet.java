@@ -146,13 +146,10 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
 
     public Collection<User> findUsers(String like, String username, String password) throws ServiceException {
         try {
-            CredentialsAuthority userAuthority = userAuthority();
+            CredentialsAuthority userAuthority = userAuthority(username, password);
             if (userAuthority == null) return new ArrayList<User>(); // None
 
-            if (userAuthority instanceof LdapAuthority) ((LdapAuthority)userAuthority).otherSearchLogin(username, password);
-            log.debug("Searching for: " + like + " (on behalf of " + username + ")");
             Collection<User> ret = userAuthority.findUsers(like);
-            log.debug("Result: " + ret);
             return ret;
         } catch (Exception ex) {
             log.warn(ex.getMessage(), ex);
@@ -162,7 +159,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
 
     public Collection<User> initialUserSet() throws ServiceException {
         try {
-            CredentialsAuthority userAuthority = userAuthority();
+            CredentialsAuthority userAuthority = userAuthority("", "");
             if (userAuthority == null) return new ArrayList<User>(); // None
             return userAuthority.initialSet();
         } catch (Exception ex) {
@@ -173,10 +170,9 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
 
     public Collection<User> expandInfo(Collection<User> input, String username, String password) throws ServiceException {
         try {
-            CredentialsAuthority userAuthority = userAuthority();
+            CredentialsAuthority userAuthority = userAuthority(username, password);
             if (userAuthority == null) return new ArrayList<User>(); // None
 
-            if (userAuthority instanceof LdapAuthority) ((LdapAuthority)userAuthority).otherSearchLogin(username, password);
             return userAuthority.expandInfo(input);
         } catch (Exception ex) {
             log.warn(ex.getMessage(), ex);
@@ -238,7 +234,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
      * but that's better than the alternative.
      */
     private void authenticate(String username, String password) throws ServiceException {
-        CredentialsAuthority userAuthority = userAuthority();
+        CredentialsAuthority userAuthority = userAuthority("", "");
         if (userAuthority == null)
             throw new ServiceException("No authentication mechanism specified, and no credentials passed by proxy. Check the configuration.");
 
@@ -300,7 +296,7 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
         return file;
     }
 
-    private CredentialsAuthority userAuthority() throws ServiceException {
+    private CredentialsAuthority userAuthority(String currentUsername, String currentPassword) throws ServiceException {
         try {
             String htPasswdFile = properties().getString("auth.htpasswd");
             if (htPasswdFile != null)
@@ -310,10 +306,12 @@ public class ConfigEditorServlet extends RemoteServiceServlet implements
             if (ldapUrl != null) {
                 LdapAuthority ldap = new LdapAuthority(ldapUrl);
 
-                String searchUser = properties().getString("auth.ldap.searchuserdn");
+                String searchDn   = properties().getString("auth.ldap.searchuserdn");
                 String searchPass = properties().getString("auth.ldap.searchpassword");
-                if (searchUser != null && !searchUser.equals(""))
-                    ldap.setSearchLogin(searchUser, searchPass);
+                if (searchDn != null && !searchDn.equals(""))
+                    ldap.setSearchLogin(searchDn, searchPass);
+                if (currentUsername != null && !currentUsername.equals(""))
+                    ldap.otherSearchLogin(currentUsername, currentPassword);
 
                 String usernameField = properties().getString("auth.ldap.usernamefield");
                 if (usernameField != null && !usernameField.equals(""))
