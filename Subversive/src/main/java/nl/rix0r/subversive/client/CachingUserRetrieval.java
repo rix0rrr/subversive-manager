@@ -86,6 +86,8 @@ public class CachingUserRetrieval implements HasValueChangeHandlers<Void> {
         final Collection<User> quickResponse = quickFind(like);
         if (!quickResponse.isEmpty()) whenFound.onSuccess(quickResponse);
 
+        fetchStartedQuery = latestQuery;
+        loading = true;
         remote.findUsers(like, username, password, new AsyncFilter<Collection<User>>(whenFound) {
             @Override
             protected Collection<User> filter(Collection<User> result) {
