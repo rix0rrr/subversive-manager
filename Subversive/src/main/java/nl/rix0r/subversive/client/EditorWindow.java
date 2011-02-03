@@ -359,7 +359,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         if (g == null) return;
 
         final GroupEditor ge = new GroupEditor(userRetrieval);
-        ge.load(editSession.groupDefinition(g));
+        ge.load(editSession.configuration(), g);
         ge.addCloseHandler(new CloseHandler<Boolean>() {
             public void onClose(CloseEvent<Boolean> event) {
                 if (event.getTarget()) {

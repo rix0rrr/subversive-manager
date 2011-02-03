@@ -23,12 +23,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import nl.rix0r.subversive.subversion.AddUserToGroup;
+import nl.rix0r.subversive.subversion.Configuration;
+import nl.rix0r.subversive.subversion.GrantPermission;
 import nl.rix0r.subversive.subversion.Group;
-import nl.rix0r.subversive.subversion.GroupDefinition;
 import nl.rix0r.subversive.subversion.Modification;
 import nl.rix0r.subversive.subversion.NewGroup;
+import nl.rix0r.subversive.subversion.Permission;
 import nl.rix0r.subversive.subversion.RemoveGroup;
 import nl.rix0r.subversive.subversion.RemoveUserFromGroup;
+import nl.rix0r.subversive.subversion.RevokePermission;
 import nl.rix0r.subversive.subversion.SingleModification;
 import nl.rix0r.subversive.subversion.User;
 
@@ -55,6 +58,8 @@ public class GroupEditor extends Composite implements HasCloseHandlers<Boolean> 
     private Set<User> added   = new HashSet<User>();
     private Set<User> removed = new HashSet<User>();
 
+    private Configuration configuration; // For when the group is renamed
+
     public GroupEditor(CachingUserRetrieval retrieval) {
         initWidget(uiBinder.createAndBindUi(this));
         allUsers.setUserRetrieval(retrieval);
@@ -66,10 +71,11 @@ public class GroupEditor extends Composite implements HasCloseHandlers<Boolean> 
         baseGroup = new Group(repository, "");
     }
 
-    public void load(GroupDefinition gd) {
-        baseGroup = gd.group();
+    public void load(Configuration configuration, Group group) {
+        this.configuration = configuration;
+        baseGroup = group;
         groupName.setText(baseGroup.name());
-        baseUsers = new HashSet<User>(gd.users());
+        baseUsers = new HashSet<User>(configuration.group(group).users());
         added     = new HashSet<User>();
         removed   = new HashSet<User>();
         refresh();
@@ -170,8 +176,10 @@ public class GroupEditor extends Composite implements HasCloseHandlers<Boolean> 
     private List<Modification> modifications() {
         List<Modification> ret = new ArrayList<Modification>();
 
-        if (baseGroup != null && !baseGroup.name().equals(groupName()))
-            renamedModifications(ret);
+        if (baseGroup.name().equals(""))
+            newModifications(ret);
+        else if (!baseGroup.name().equals(groupName()))
+            renameModifications(ret);
         else
             inplaceModifications(ret);
 
@@ -179,15 +187,34 @@ public class GroupEditor extends Composite implements HasCloseHandlers<Boolean> 
     }
 
     /**
-     * List of modifications when the group is renamed or a new group is created
+     * List of modifications when the group is renamed
      *
      * In that case: remove the old group, entirely add the group with the
-     * new name
+     * new name. Also, replace all permissions for the old group with
+     * permissions for the new group.
      */
-    private void renamedModifications(List<Modification> into) {
-        if (!baseGroup.name().equals(""))
-            into.add(new RemoveGroup(baseGroup));
+    private void renameModifications(List<Modification> into) {
+        // Remove all permissions and the old group
+        for (Permission perm: configuration.permissions(null, baseGroup))
+            into.add(new RevokePermission(perm));
+        into.add(new RemoveGroup(baseGroup));
 
+        // Add the new group and the new permissions
+        Group newGroup = new Group(baseGroup.repository(), groupName());
+        into.add(new NewGroup(newGroup));
+        for (Permission perm: configuration.permissions(null, baseGroup)) 
+            into.add(new GrantPermission(perm.change(newGroup)));
+
+        // Add the users to the new group
+        for (User u: effectiveUsers())
+            into.add(new AddUserToGroup(u, newGroup));
+
+    }
+
+    /**
+     * Modifications for when this is for creating a new group
+     */
+    private void newModifications(List<Modification> into) {
         Group newGroup = new Group(baseGroup.repository(), groupName());
         into.add(new NewGroup(newGroup));
 
