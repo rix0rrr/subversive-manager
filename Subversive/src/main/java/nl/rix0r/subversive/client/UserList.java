@@ -39,7 +39,6 @@ public class UserList extends Composite implements
     @UiField TextBox searchField;
 
     private CachingUserRetrieval service;
-    private boolean loading = false;
     private Collection<User> baseUsers;
 
     public UserList() {
@@ -90,21 +89,17 @@ public class UserList extends Composite implements
     }
 
     private void retrieveInitialSet() {
-        loading = true;
         service.initialUserSet(fillUsers);
     }
 
     private void retrieveBasedOnFilter() {
-        if (loading) return;
-        loading = true;
-        users.getModel().clear();
         // Beware: can fire the callback twice if a partial response comes from the cache
+        if (service.willStartNewSearch()) users.getModel().clear();
         service.findUsers(searchField.getValue(), fillUsers);
     }
 
     AsyncCallback<Collection<User>> fillUsers = new Subversive.Callback<Collection<User>>() {
         public void onSuccess(Collection<User> result) {
-            loading = false;
             users.getModel().addAll(result);
             if (users.getSelectedRow() == -1) users.setSelectedRow(0);
         }

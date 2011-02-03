@@ -28,7 +28,7 @@ public class ConfigWriterTest {
                 Access.Read)).apply(config);
         config.save(writer);
 
-        Assert.assertTrue(writer.toString().contains("@foo_Owners="));
+        Assert.assertTrue(writer.toString().contains("@foo.Owners="));
     }
 
 }
