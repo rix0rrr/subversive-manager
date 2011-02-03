@@ -29,6 +29,7 @@ import nl.rix0r.subversive.subversion.Modification;
 import nl.rix0r.subversive.subversion.NewGroup;
 import nl.rix0r.subversive.subversion.RemoveGroup;
 import nl.rix0r.subversive.subversion.RemoveUserFromGroup;
+import nl.rix0r.subversive.subversion.SingleModification;
 import nl.rix0r.subversive.subversion.User;
 
 /**
@@ -162,7 +163,11 @@ public class GroupEditor extends Composite implements HasCloseHandlers<Boolean> 
         return t.trim();
     }
 
-    public List<Modification> modifications() {
+    public Modification modification() {
+        return new SingleModification(modifications());
+    }
+
+    private List<Modification> modifications() {
         List<Modification> ret = new ArrayList<Modification>();
 
         if (baseGroup != null && !baseGroup.name().equals(groupName()))

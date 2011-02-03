@@ -346,7 +346,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         ge.addCloseHandler(new CloseHandler<Boolean>() {
             public void onClose(CloseEvent<Boolean> event) {
                 if (event.getTarget()) {
-                    editSession.addAll(ge.modifications());
+                    editSession.add(ge.modification());
                     refresh();
                 }
                 Subversive.display(EditorWindow.this);
@@ -363,7 +363,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         ge.addCloseHandler(new CloseHandler<Boolean>() {
             public void onClose(CloseEvent<Boolean> event) {
                 if (event.getTarget()) {
-                    editSession.addAll(ge.modifications());
+                    editSession.add(ge.modification());
                     refresh();
                 }
                 Subversive.display(EditorWindow.this);

@@ -86,8 +86,17 @@ public class EditSession implements Serializable {
 
     /**
      * Count the modification in the group table if it is a group modification
+     *
+     * FIXME: Now does ugly case analysis on types of modifications. Should
+     * inspect the actual results of modifications.
      */
     private void countGroupModification(Modification m) {
+        if (m instanceof SingleModification) {
+            for (Modification mod: ((SingleModification)m).modifications())
+                countGroupModification(mod);
+            return;
+        }
+
         Group group = null;
         boolean add = false;
         if (m instanceof AddUserToGroup) {
