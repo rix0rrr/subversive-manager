@@ -10,6 +10,7 @@ import nl.rix0r.subversive.subversion.NewGroup;
 import nl.rix0r.subversive.subversion.Permission;
 import nl.rix0r.subversive.subversion.User;
 import org.apache.commons.io.output.StringBuilderWriter;
+import org.apache.commons.lang.math.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -66,4 +67,25 @@ public class ConfigWriterTest {
         Assert.assertTrue("Group definition", writer.toString().contains("foo-bar.Repo-Owners = henk"));
     }
 
+    @Test
+    public void writeGroupsSorted() throws Exception {
+        for (int i = 0; i < 50; i++) {
+            Group group = new Group(generateWord(), generateWord());
+            new NewGroup(group).apply(config);
+        }
+        config.save(writer);
+
+        String[] lines = writer.toString().split("\n");
+        for (int i = 1; i < lines.length - 1; i++)
+            Assert.assertTrue(lines[i].compareToIgnoreCase(lines[i + 1]) <= 0);
+    }
+
+    String chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
+
+    String generateWord() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 10; i++)
+            sb.append(chars.charAt(RandomUtils.nextInt(chars.length())));
+        return sb.toString();
+    }
 }
