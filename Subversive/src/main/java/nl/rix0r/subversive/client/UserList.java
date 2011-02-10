@@ -16,6 +16,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class UserList extends Composite implements
 
     @UiField(provided=true) UserSelectList users;
     @UiField TextBox searchField;
+    @UiField Label notice;
 
     private CachingUserRetrieval service;
     private Collection<User> baseUsers;
@@ -54,6 +56,12 @@ public class UserList extends Composite implements
         });
     }
 
+    public void setNotice(String notice) {
+        if (notice == null) notice = "";
+        this.notice.setText(notice);
+        this.notice.setVisible(!notice.equals(""));
+    }
+
     /**
      * Set the service that can be used to retrieve information about users
      */
@@ -66,6 +74,7 @@ public class UserList extends Composite implements
     }
 
     public void setUsers(Collection<User> users) {
+        setNotice("");
         this.baseUsers = new ArrayList<User>(users);
         this.service = null;
         showFromBaseSet();
@@ -89,7 +98,7 @@ public class UserList extends Composite implements
     }
 
     private void retrieveInitialSet() {
-        service.initialUserSet(fillUsers);
+        service.initialUserSet(initialFillUsers);
     }
 
     private void retrieveBasedOnFilter() {
@@ -98,8 +107,18 @@ public class UserList extends Composite implements
         service.findUsers(searchField.getValue(), fillUsers);
     }
 
+    AsyncCallback<Collection<User>> initialFillUsers = new Subversive.Callback<Collection<User>>() {
+        public void onSuccess(Collection<User> result) {
+            if (result.isEmpty())
+                setNotice("Start typing to search for a user.");
+            else
+                fillUsers.onSuccess(result);
+        }
+    };
+
     AsyncCallback<Collection<User>> fillUsers = new Subversive.Callback<Collection<User>>() {
         public void onSuccess(Collection<User> result) {
+            setNotice("");
             users.getModel().addAll(result);
             if (users.getSelectedRow() == -1) users.setSelectedRow(0);
         }
