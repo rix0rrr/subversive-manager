@@ -20,6 +20,19 @@ body {
     padding-bottom: 20px;
 }
 
+.masthead {
+    width: 900px;
+    margin: 0 auto;
+    font-size: 11px;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.masthead, .masthead a {
+    font-family: arial, sans-serif;
+    color: #788191;
+}
+
 .logo {
     position: absolute;
     left: 100%;
