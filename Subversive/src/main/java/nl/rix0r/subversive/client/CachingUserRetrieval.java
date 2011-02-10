@@ -22,9 +22,8 @@ import nl.rix0r.subversive.subversion.User;
  *
  * @author rix0rrr
  */
-public class CachingUserRetrieval implements HasValueChangeHandlers<Void> {
+public class CachingUserRetrieval {
     private UserRetrievalServiceAsync remote;
-    private HandlerManager handlerManager = new HandlerManager(this);
 
     // Users that we've already seen
     private Map<User, User> seenUsers = new HashMap<User, User>();
@@ -40,6 +39,8 @@ public class CachingUserRetrieval implements HasValueChangeHandlers<Void> {
 
     private String username;
     private String password;
+
+    private Runnable onExpandUpdate;
 
     public CachingUserRetrieval(UserRetrievalServiceAsync remote) {
         this.remote = remote;
@@ -146,7 +147,9 @@ public class CachingUserRetrieval implements HasValueChangeHandlers<Void> {
      * Signal that a loop of expandUser calls is finished, and retrieval
      * can start
      */
-    public void finished() {
+    public void finished(Runnable onUpdate) {
+        this.onExpandUpdate = onUpdate;
+
         if (!pendingUsers.isEmpty()) {
             remote.expandInfo(pendingUsers, username, password, usersRetrieved);
             pendingUsers.clear();
@@ -159,15 +162,7 @@ public class CachingUserRetrieval implements HasValueChangeHandlers<Void> {
 
         public void onSuccess(Collection<User> result) {
             remember(result);
-            ValueChangeEvent.fire(CachingUserRetrieval.this, null);
+            if (onExpandUpdate != null) onExpandUpdate.run();
         }
     };
-
-    public HandlerRegistration addValueChangeHandler(ValueChangeHandler<Void> handler) {
-        return handlerManager.addHandler(ValueChangeEvent.getType(), handler);
-    }
-
-    public void fireEvent(GwtEvent<?> event) {
-        handlerManager.fireEvent(event);
-    }
 }

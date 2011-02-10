@@ -76,6 +76,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
 
     private EditSession editSession;
     private CachingUserRetrieval userRetrieval;
+    private GroupEditor currentGroupEditor;
 
     public EditorWindow(EditSession editSession, CachingUserRetrieval userRetrieval) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -86,13 +87,6 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         directoryTree.setDecorator(directoryDecorator);
 
         setEditSession(editSession);
-
-        // When the user retrieval fires, we refresh
-        userRetrieval.addValueChangeHandler(new ValueChangeHandler<Void>() {
-            public void onValueChange(ValueChangeEvent<Void> event) {
-                refresh();
-            }
-        });
     }
 
     public void setEditSession(EditSession editSession) {
@@ -178,6 +172,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
             else
                 ret.add(perm);
         }
+        userRetrieval.finished(doRefresh);
 
         return ret;
     }
@@ -345,18 +340,19 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     }
 
     private void newGroup() {
-        final GroupEditor ge = new GroupEditor(userRetrieval);
-        ge.newGroup(editSession.repository());
-        ge.addCloseHandler(new CloseHandler<Boolean>() {
+        currentGroupEditor = new GroupEditor(userRetrieval);
+        currentGroupEditor.newGroup(editSession.repository());
+        currentGroupEditor.addCloseHandler(new CloseHandler<Boolean>() {
             public void onClose(CloseEvent<Boolean> event) {
                 if (event.getTarget()) {
-                    editSession.add(ge.modification());
+                    editSession.add(currentGroupEditor.modification());
                     refresh();
                 }
                 Subversive.display(EditorWindow.this);
+                currentGroupEditor = null;
             }
         });
-        Subversive.display(ge);
+        Subversive.display(currentGroupEditor);
     }
 
     private void editGroup(Group g) {
@@ -402,6 +398,12 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
                 p.add(new Image(Resources.The.noFolderImage()));
             p.add(new InlineLabel(ti.getText()));
             ti.setWidget(p);
+        }
+    };
+
+    private Runnable doRefresh = new Runnable() {
+        public void run() {
+            refresh();
         }
     };
 }
