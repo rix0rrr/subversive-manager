@@ -28,9 +28,9 @@ import java.util.Set;
 abstract public class SelectableTable<T> extends FlexTable
         implements HasSelectionHandlers<T>, HasOpenHandlers<T> {
 
-    private int selectedRow       = -1;
-    private ListModel<T> model    = new ListModel<T>();
-    private Map<T, Row> rows = new HashMap<T, Row>();
+    private int selectedRow    = -1;
+    private ListModel<T> model = new ListModel<T>();
+    private Map<T, Row> rows   = new HashMap<T, Row>();
 
     public SelectableTable() {
         setCellSpacing(0);

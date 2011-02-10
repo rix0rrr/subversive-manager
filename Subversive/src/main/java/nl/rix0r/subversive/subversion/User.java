@@ -9,7 +9,7 @@ package nl.rix0r.subversive.subversion;
  *
  * @author rix0rrr
  */
-public class User implements Principal {
+public class User implements Principal, Comparable {
     private String username;
     private String fullName;
 
@@ -63,5 +63,9 @@ public class User implements Principal {
     @Override
     public String toString() {
         return fullName.equals("") ? username : fullName;
+    }
+
+    public int compareTo(Object o) {
+        return toString().compareToIgnoreCase(o.toString());
     }
 }
