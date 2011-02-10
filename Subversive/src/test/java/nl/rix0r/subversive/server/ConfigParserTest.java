@@ -41,10 +41,16 @@ public class ConfigParserTest {
 
     @Test
     public void repositoryWithDashes() throws Exception {
-        config.load(input("[groups]", "foo-bar.boop=baz"));
+        config.load(input("[groups]",
+                "foo-bar.boop=baz",
+                "[repo:/]",
+                "@foo-bar.boop=r"
+                ));
 
+        Group group = new Group("foo-bar", "boop");
         Assert.assertEquals(0, config.loadWarnings().size());
-        Assert.assertNotNull(config.group(new Group("foo-bar", "boop")));
+        Assert.assertNotNull(config.group(group));
+        Assert.assertTrue("Permissions", config.permissions(null, group).size() == 1);
     }
 
     @Test

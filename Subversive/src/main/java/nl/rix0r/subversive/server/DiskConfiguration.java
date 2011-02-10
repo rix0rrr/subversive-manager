@@ -322,7 +322,7 @@ public class DiskConfiguration extends Configuration {
         protected static Principal deserialize(String spec) {
             spec = spec.trim();
 
-            if (spec.startsWith("@")) return ConfigGroup.deserialize(decode(spec.substring(1)));
+            if (spec.startsWith("@")) return ConfigGroup.deserialize(spec.substring(1));
             if (spec.equals("*")) return new Anonymous();
             return ConfigUser.deserialize(decode(spec));
         }
