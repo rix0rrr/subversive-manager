@@ -273,6 +273,12 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     }
 
     @UiHandler("permissions")
+    void permissionsDoubleClicked(OpenEvent<PrincipalAccess> e) {
+        if (!(e.getTarget().principal instanceof Group)) return;
+        editGroup((Group)e.getTarget().principal);
+    }
+
+    @UiHandler("permissions")
     void permissionChanged(ValueChangeEvent<PrincipalAccess> e) {
         grantChangedPermissions(e.getValue().principal, e.getValue().access);
     }
@@ -284,9 +290,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
 
     @UiHandler("editGroupButton")
     void editGroupClicked(ClickEvent e) {
-        Group selected = groups.selected();
-        if (selected == null || selected.global()) return;
-        editGroup(selected);
+        editGroup(groups.selected());
     }
 
     @UiHandler("deleteGroupButton")
@@ -356,7 +360,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     }
 
     private void editGroup(Group g) {
-        if (g == null) return;
+        if (g == null || g.global()) return;
 
         final GroupEditor ge = new GroupEditor(userRetrieval);
         ge.load(editSession.configuration(), g);

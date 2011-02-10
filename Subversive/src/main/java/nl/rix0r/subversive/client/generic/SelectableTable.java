@@ -3,7 +3,12 @@ package nl.rix0r.subversive.client.generic;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.DoubleClickEvent;
+import com.google.gwt.event.dom.client.DoubleClickHandler;
+import com.google.gwt.event.logical.shared.HasOpenHandlers;
 import com.google.gwt.event.logical.shared.HasSelectionHandlers;
+import com.google.gwt.event.logical.shared.OpenEvent;
+import com.google.gwt.event.logical.shared.OpenHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -21,7 +26,7 @@ import java.util.Set;
  * @author rix0rrr
  */
 abstract public class SelectableTable<T> extends FlexTable
-        implements HasSelectionHandlers<T> {
+        implements HasSelectionHandlers<T>, HasOpenHandlers<T> {
 
     private int selectedRow       = -1;
     private ListModel<T> model    = new ListModel<T>();
@@ -34,6 +39,14 @@ abstract public class SelectableTable<T> extends FlexTable
             public void onClick(ClickEvent event) {
                 Cell c = getCellForEvent(event);
                 if (c != null) setSelectedRow(c.getRowIndex());
+            }
+        });
+
+        // Translate double-click events into "open" events on the row data
+        addDoubleClickHandler(new DoubleClickHandler() {
+            public void onDoubleClick(DoubleClickEvent event) {
+                T sel = selected();
+                if (sel != null) OpenEvent.fire(SelectableTable.this, sel);
             }
         });
 
@@ -63,6 +76,10 @@ abstract public class SelectableTable<T> extends FlexTable
 
     public HandlerRegistration addSelectionHandler(SelectionHandler<T> handler) {
         return addHandler(handler, SelectionEvent.getType());
+    }
+
+    public HandlerRegistration addOpenHandler(OpenHandler<T> handler) {
+        return addHandler(handler, OpenEvent.getType());
     }
 
     private void updateCellStyles() {
