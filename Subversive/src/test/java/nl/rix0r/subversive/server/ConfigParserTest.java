@@ -54,6 +54,20 @@ public class ConfigParserTest {
     }
 
     @Test
+    public void groupWithDashes() throws Exception {
+        config.load(input("[groups]",
+                "foo-bar.boop-boop=baz",
+                "[repo:/]",
+                "@foo-bar.boop-boop=r"
+                ));
+
+        Group group = new Group("foo-bar", "boop boop");
+        Assert.assertEquals(0, config.loadWarnings().size());
+        Assert.assertNotNull(config.group(group));
+        Assert.assertTrue("Permissions", config.permissions(null, group).size() == 1);
+    }
+
+    @Test
     public void permissionAssigmentGroup() throws Exception {
         config.load(input("[groups]", "foo=bar", "[a:/]", "@foo=r"));
 

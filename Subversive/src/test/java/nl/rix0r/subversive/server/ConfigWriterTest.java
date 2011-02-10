@@ -35,7 +35,7 @@ public class ConfigWriterTest {
     }
 
     @Test
-    public void writeGroupWithDash() throws Exception {
+    public void writeRepoWithDash() throws Exception {
         String repo = "foo-bar";
         Group group = new Group(repo, "Owners");
         new NewGroup(group).apply(config);
@@ -48,6 +48,22 @@ public class ConfigWriterTest {
 
         Assert.assertTrue("Permission", writer.toString().contains("@foo-bar.Owners=r"));
         Assert.assertTrue("Group definition", writer.toString().contains("foo-bar.Owners = henk"));
+    }
+
+    @Test
+    public void writeGroupWithDash() throws Exception {
+        String repo = "foo-bar";
+        Group group = new Group(repo, "Repo Owners");
+        new NewGroup(group).apply(config);
+        new AddUserToGroup(new User("henk"), group).apply(config);
+        new GrantPermission(new Permission(
+                new Directory(repo, "/"),
+                group,
+                Access.Read)).apply(config);
+        config.save(writer);
+
+        Assert.assertTrue("Permission", writer.toString().contains("@foo-bar.Repo-Owners=r"));
+        Assert.assertTrue("Group definition", writer.toString().contains("foo-bar.Repo-Owners = henk"));
     }
 
 }
