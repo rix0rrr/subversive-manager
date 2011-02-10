@@ -10,6 +10,7 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -20,6 +21,20 @@ import java.util.List;
 public class ListModel<T> implements HasValueChangeHandlers<Object> {
     private List<T> contents = new ArrayList<T>();
     private HandlerManager events = new HandlerManager(this);
+    private Comparator<? super T> comparator;
+
+    public void setComparator(Comparator<? super T> comparator) {
+        this.comparator = comparator;
+    }
+
+    public Comparator<? super T> getComparator() {
+        return this.comparator;
+    }
+
+    public void sort() {
+        if (comparator != null)
+            Collections.sort(contents, comparator);
+    }
 
     public void add(T element) {
         contents.add(element);
@@ -74,6 +89,7 @@ public class ListModel<T> implements HasValueChangeHandlers<Object> {
     }
 
     protected void changed() {
+        sort();
         ValueChangeEvent.fire(this, null);
     }
 }

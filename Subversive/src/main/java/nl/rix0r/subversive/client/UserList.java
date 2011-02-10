@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import nl.rix0r.subversive.client.generic.SelectableTable;
 import nl.rix0r.subversive.client.generic.SelectableTable.Row;
@@ -52,6 +53,13 @@ public class UserList extends Composite implements
                 fireOpenEvent();
                 event.preventDefault();
                 event.stopPropagation();
+            }
+        });
+
+        users.getModel().setComparator(new Comparator<User>() {
+            public int compare(User o1, User o2) {
+                // Otherwise by name as per uuush
+                return o1.compareTo(o2);
             }
         });
     }

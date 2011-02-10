@@ -18,6 +18,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import nl.rix0r.subversive.client.generic.SelectableTable;
 import nl.rix0r.subversive.client.generic.SelectableTable.Row;
@@ -48,6 +49,17 @@ public class GroupList extends Composite implements
                 fireOpenEvent();
                 event.preventDefault();
                 event.stopPropagation();
+            }
+        });
+
+        groups.getModel().setComparator(new Comparator<Group>() {
+            public int compare(Group o1, Group o2) {
+                // Sort local before global
+                if (o1.global() != o2.global())
+                    return o1.global() ? 1 : -1;
+
+                // Otherwise by name as per uuush
+                return o1.compareTo(o2);
             }
         });
     }
