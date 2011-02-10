@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Specification of the members of a group
  */
-public class GroupDefinition implements Serializable {
+public class GroupDefinition implements Serializable, Comparable {
     private Group group;
     private Set<User> users = new HashSet<User>();
 
@@ -73,5 +73,9 @@ public class GroupDefinition implements Serializable {
         hash = 47 * hash + (this.group != null ? this.group.hashCode() : 0);
         hash = 47 * hash + (this.users != null ? this.users.hashCode() : 0);
         return hash;
+    }
+
+    public int compareTo(Object o) {
+        return this.group().compareTo(((GroupDefinition)o).group());
     }
 }

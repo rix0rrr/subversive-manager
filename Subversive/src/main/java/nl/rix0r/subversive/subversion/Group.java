@@ -9,7 +9,7 @@ package nl.rix0r.subversive.subversion;
  *
  * @author rix0rrr
  */
-public class Group implements Principal {
+public class Group implements Principal, Comparable {
     private String repository;
     private String name;
 
@@ -74,5 +74,13 @@ public class Group implements Principal {
         hash = 97 * hash + (this.repository != null ? this.repository.toLowerCase().hashCode() : 0);
         hash = 97 * hash + (this.name != null ? this.name.toLowerCase().hashCode() : 0);
         return hash;
+    }
+
+    public int compareTo(Object o) {
+        Group that = (Group)o;
+        int c = 0;
+        if (c == 0) c = this.repository.compareToIgnoreCase(that.repository);
+        if (c == 0) c = this.name.compareToIgnoreCase(that.name);
+        return c;
     }
 }

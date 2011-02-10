@@ -75,7 +75,7 @@ public class DiskConfiguration extends Configuration {
         ConfigWriter w = new ConfigWriter(writer);
 
         w.startGroupDefinitions();
-        for (GroupDefinition gd: groupDefinitions())
+        for (GroupDefinition gd: groupDefinitionsSorted())
             w.groupDefinition(gd);
 
         for (Permission p: permissions(null, null))
@@ -93,8 +93,8 @@ public class DiskConfiguration extends Configuration {
      * Context relevant for parsing during loading of the file
      */
     protected class ConfigParser {
-        private List<String> warnings = new LinkedList<String>();
-        private boolean   inGroupBlock   = false;
+        private List<String>    warnings = new LinkedList<String>();
+        private boolean     inGroupBlock = false;
         private Directory blockDirectory = null;
 
         /**
