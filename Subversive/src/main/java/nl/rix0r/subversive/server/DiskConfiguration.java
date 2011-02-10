@@ -299,7 +299,7 @@ public class DiskConfiguration extends Configuration {
             String[] parts = name.split(Pattern.quote(groupSeparator), 2);
 
             if (parts.length == 1) return new Group(parts[0]);
-            return new Group(decode(parts[0]), decode(parts[1]));
+            return new Group(parts[0], decode(parts[1]));
         }
 
         protected static String serialize(Group group) {
