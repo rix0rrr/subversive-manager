@@ -57,10 +57,12 @@ public class GroupEditor extends Composite implements HasCloseHandlers<Boolean> 
     private Set<User> baseUsers = Collections.emptySet();
     private Set<User> added   = new HashSet<User>();
     private Set<User> removed = new HashSet<User>();
+    private CachingUserRetrieval userRetrieval;
 
     private Configuration configuration; // For when the group is renamed
 
     public GroupEditor(CachingUserRetrieval retrieval) {
+        userRetrieval = retrieval;
         initWidget(uiBinder.createAndBindUi(this));
         allUsers.setUserRetrieval(retrieval);
 
@@ -81,8 +83,8 @@ public class GroupEditor extends Composite implements HasCloseHandlers<Boolean> 
         refresh();
     }
 
-    private void refresh() {
-        groupUsers.setUsers(effectiveUsers());
+    public void refresh() {
+        groupUsers.setUsers(expandUsers(effectiveUsers()));
     }
 
     private Collection<User> effectiveUsers() {
@@ -90,6 +92,16 @@ public class GroupEditor extends Composite implements HasCloseHandlers<Boolean> 
         for (User u: added) effective.add(u);
         for (User u: removed) effective.remove(u);
         return effective;
+    }
+
+    private Collection<User> expandUsers(Collection<User> users) {
+        Set<User> expanded = new HashSet<User>();
+        for (User user: users)
+            expanded.add(userRetrieval.expandUser(user));
+
+        userRetrieval.finished(doRefresh);
+
+        return expanded;
     }
 
     private void updateButtonStates() {
@@ -232,4 +244,10 @@ public class GroupEditor extends Composite implements HasCloseHandlers<Boolean> 
         for (User u: added)
             into.add(new AddUserToGroup(u, baseGroup));
     }
+
+    private Runnable doRefresh = new Runnable() {
+        public void run() {
+            refresh();
+        }
+    };
 }
