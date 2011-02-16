@@ -28,7 +28,7 @@ body {
     margin-top: 5px;
 }
 
-.masthead, .masthead a {
+.masthead, .masthead a, .masthead a:visited {
     font-family: arial, sans-serif;
     color: #788191;
 }
