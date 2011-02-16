@@ -97,6 +97,16 @@ public class ConfigParserTest {
         Assert.assertEquals("admin", config.groupDefinitions().iterator().next().group().name());
     }
 
+    @Test
+    public void recognizeEmptyGroups() throws Exception {
+        config.load(input(
+                "[groups]",
+                "admin = "
+                ));
+        Assert.assertEquals(1, config.groupDefinitions().size());
+        Assert.assertEquals(0, config.group(new Group("admin")).users().size());
+    }
+
     private Reader input(String... lines) {
         return new StringReader(StringUtils.join(lines, "\n"));
     }

@@ -189,9 +189,13 @@ public class DiskConfiguration extends Configuration {
             //
             // group = user, user, @group, user definition
             //
-            Group group = ConfigGroup.deserialize(groupName);
-            for (String username: members.split(","))
-                addUserToGroup(group, ConfigUser.deserialize(username.trim()));
+            Group group        = ConfigGroup.deserialize(groupName);
+            GroupDefinition gd = addGroup(group); // Make sure the group exists, regardless of users
+
+            if (!members.trim().equals("")) {
+                for (String username: members.split(","))
+                    addUserToGroup(group, ConfigUser.deserialize(username.trim()));
+            }
         }
 
         private void accessDefinition(String principalDef, String accessCode, int number) {
