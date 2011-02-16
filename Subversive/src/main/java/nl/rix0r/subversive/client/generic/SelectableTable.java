@@ -70,6 +70,11 @@ abstract public class SelectableTable<T> extends FlexTable
         return getModel().get(getSelectedRow());
     }
 
+    public void select(T selected) {
+        int ix = getModel().find(selected);
+        setSelectedRow(ix);
+    }
+
     private void fireSelectionEvent() {
         SelectionEvent.fire(this, selected());
     }

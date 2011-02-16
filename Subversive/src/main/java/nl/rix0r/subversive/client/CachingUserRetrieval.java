@@ -1,13 +1,8 @@
 
 package nl.rix0r.subversive.client;
 
-import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.event.shared.GwtEvent;
-import com.google.gwt.event.shared.HandlerManager;
-import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -70,6 +65,8 @@ public class CachingUserRetrieval {
         return ret;
     }
 
+    private Set<User> responseUsers = new HashSet<User>();
+
     /**
      * Find users with names matching the given query strings
      *
@@ -84,29 +81,26 @@ public class CachingUserRetrieval {
         latestQuery = like;
         if (loading) return;
 
-        final Collection<User> quickResponse = quickFind(like);
-        if (!quickResponse.isEmpty()) whenFound.onSuccess(quickResponse);
+        responseUsers = new HashSet<User>();
+        responseUsers.addAll(quickFind(like));
+        if (!responseUsers.isEmpty()) whenFound.onSuccess(responseUsers);
 
         fetchStartedQuery = latestQuery;
         loading = true;
-        remote.findUsers(like, username, password, new AsyncFilter<Collection<User>>(whenFound) {
-            @Override
-            protected Collection<User> filter(Collection<User> result) {
+        remote.findUsers(like, username, password, new Subversive.Callback<Collection<User>>() {
+            public void onSuccess(Collection<User> result) {
                 remember(result);
-                // Return only what wasn't yet in the quick response
-                result.removeAll(quickResponse);
-                loading = false;
+                responseUsers.addAll(result);
 
+                // Send the entire NEW list to the listener
+                whenFound.onSuccess(responseUsers);
+
+                // Start a new fetch if the query has changed
+                loading = false;
                 if (!fetchStartedQuery.equals(latestQuery))
                     findUsers(latestQuery, whenFound);
-
-                return result;
             }
         });
-    }
-
-    public boolean willStartNewSearch() {
-        return !loading;
     }
 
     public void initialUserSet(AsyncCallback<Collection<User>> callback) {
