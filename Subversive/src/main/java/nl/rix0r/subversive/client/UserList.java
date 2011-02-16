@@ -111,7 +111,6 @@ public class UserList extends Composite implements
 
     private void retrieveBasedOnFilter() {
         // Beware: can fire the callback twice if a partial response comes from the cache
-        if (service.willStartNewSearch()) users.getModel().clear();
         service.findUsers(searchField.getValue(), fillUsers);
     }
 
@@ -127,7 +126,9 @@ public class UserList extends Composite implements
     AsyncCallback<Collection<User>> fillUsers = new Subversive.Callback<Collection<User>>() {
         public void onSuccess(Collection<User> result) {
             setNotice("");
-            users.getModel().addAll(result);
+            User selected = users.selected();
+            users.getModel().replace(result);
+            users.select(selected);
             if (users.getSelectedRow() == -1) users.setSelectedRow(0);
         }
     };

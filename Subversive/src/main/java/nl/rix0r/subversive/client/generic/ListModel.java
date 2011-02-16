@@ -61,6 +61,10 @@ public class ListModel<T> implements HasValueChangeHandlers<Object> {
         changed();
     }
 
+    public int find(T what) {
+        return contents.indexOf(what);
+    }
+
     public T get(int i) {
         if (i < 0 || i >= size()) return null; // Explosion-safe get
         return contents.get(i);
