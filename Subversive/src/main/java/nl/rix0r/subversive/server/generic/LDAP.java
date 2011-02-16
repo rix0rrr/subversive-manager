@@ -1,6 +1,7 @@
 package nl.rix0r.subversive.server.generic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -94,8 +95,8 @@ public class LDAP {
         }
     }
 
-    public String findUserDn(String uid) {
-        return findUserDn(uid, "uid");
+    public String findUserDn(String uid, boolean absolute) {
+        return findUserName(uid, "uid", absolute);
     }
 
     /**
@@ -103,8 +104,11 @@ public class LDAP {
      *
      * Call this on an anonymously bound LDAP server to obtain
      * the DN to use for authentication.
+     *
+     * With respect to the current LDAP root, returns either the absolute name or the
+     * relative name.
      */
-    public String findUserDn(String uid, String searchField) {
+    public String findUserName(String uid, String searchField, boolean absolute) {
         try {
             bind();
 
@@ -117,7 +121,7 @@ public class LDAP {
             NamingEnumeration<SearchResult> answer = context.search("", filter, ctrls);
 
             if (answer.hasMore())
-                return answer.next().getNameInNamespace();
+                return absolute ? answer.next().getNameInNamespace() : answer.next().getName();
 
             return "";
         } catch (NamingException ex) {
@@ -128,11 +132,11 @@ public class LDAP {
     /**
      * Return a map of given properties for the identified object
      */
-    public Map<String, String> getProperties(String dn, String... properties) {
+    public Map<String, String> getProperties(String relativeDn, String... properties) {
         try {
             bind();
 
-            Attributes as = context.getAttributes(dn, properties);
+            Attributes as = context.getAttributes(relativeDn, properties);
             return makeMap(as, properties);
 
         } catch (NamingException ex) {
@@ -227,7 +231,7 @@ public class LDAP {
     public static void validateCredentials(String url, String searchField, String username, String password, String searchUserDn, String searchPassword) {
         LDAP searchLdap = new LDAP(url, searchUserDn, searchPassword);
         try {
-            String userDn = searchLdap.findUserDn(username, searchField);
+            String userDn = searchLdap.findUserName(username, searchField, true);
             if (userDn.equals("")) throw new RuntimeException("Username not found: " + username);
 
             LDAP authLdap = new LDAP(url, userDn, password);

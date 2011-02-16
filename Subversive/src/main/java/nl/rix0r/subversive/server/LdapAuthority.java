@@ -65,7 +65,7 @@ public class LdapAuthority implements CredentialsAuthority {
     private String findDn(String username) {
         LDAP ldap = new LDAP(url, searchDn, searchPass);
         try {
-            return ldap.findUserDn(username, usernameField);
+            return ldap.findUserName(username, usernameField, true);
         } finally {
             ldap.close();
         }
@@ -156,7 +156,7 @@ public class LdapAuthority implements CredentialsAuthority {
         LDAP ldap = new LDAP(url, searchDn, searchPass);
         try {
             for (User user: input) {
-                String dn = ldap.findUserDn(user.username(), usernameField);
+                String dn = ldap.findUserName(user.username(), usernameField, false);
                 if (!dn.equals(""))
                     ret.add(userFromMap(ldap.getProperties(dn, interestingFields())));
             }
