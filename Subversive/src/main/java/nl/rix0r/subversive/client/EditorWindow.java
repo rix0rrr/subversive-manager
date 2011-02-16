@@ -254,7 +254,9 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
 
     @UiHandler("groups")
     void handleGroupOpen(OpenEvent<Group> e) {
-        grantNewPermissions(e.getTarget());
+        // Double-click should enter edit -- it's usually what you want to do with groups
+        // and it's consistent with the behaviour in the permissions list.
+        editGroup(e.getTarget());
     }
 
     @UiHandler("groups")
