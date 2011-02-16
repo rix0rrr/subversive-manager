@@ -12,7 +12,7 @@
 
     <g:DockLayoutPanel unit="EM">
         <g:north size="2">
-            <ss:HintTextBox ui:field="searchField" hint="Search..." />
+            <ss:HintTextBox ui:field="searchField" hint="Search..." width="100%" />
         </g:north>
         <g:center>
             <g:LayoutPanel>
