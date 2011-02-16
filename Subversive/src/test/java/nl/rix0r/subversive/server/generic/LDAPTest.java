@@ -24,13 +24,13 @@ public class LDAPTest {
 
     @Test
     public void testFindDn() {
-        String dn = new LDAP(url, search_user, search_pass).findUserDn("stuart", "cn");
+        String dn = new LDAP(url, search_user, search_pass).findUserName("stuart", "cn", true);
         Assert.assertEquals("cn=stuart,ou=users,dc=testathon,dc=net", dn.toLowerCase());
     }
 
     @Test
     public void testFindDnDeep() {
-        String dn = new LDAP(url, search_user, search_pass).findUserDn("alice", "cn");
+        String dn = new LDAP(url, search_user, search_pass).findUserName("alice", "cn", true);
         Assert.assertEquals("cn=alice,ou=staff,ou=users,dc=testathon,dc=net", dn.toLowerCase());
     }
 
