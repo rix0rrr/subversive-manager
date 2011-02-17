@@ -116,10 +116,10 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
 
     private Tab selectedTab() {
         int ix = tabpanel.getSelectedIndex();
-        if (tabpanel.getTabWidget(ix).getTitle().toLowerCase().startsWith("group"))
-            return Tab.Groups;
-        else
-            return Tab.Users;
+        switch (ix) {
+            case 0: return Tab.Groups;
+            default: return Tab.Users;
+        }
     }
 
     /**
