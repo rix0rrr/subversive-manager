@@ -1,0 +1,7 @@
+To build for deployment:
+
+    mvn clean package 
+    
+If the build fails because the LDAP tests fail (they try to contact an outside LDAP server):
+    
+    mvn clean package -Dmaven.test.skip=true
