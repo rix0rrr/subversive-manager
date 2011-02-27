@@ -18,6 +18,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Label;
@@ -49,6 +50,7 @@ import nl.rix0r.subversive.subversion.User;
  * @author rix0rrr
  */
 public class EditorWindow extends Composite implements HasCloseHandlers<EditSession> {
+
     interface MyUiBinder extends UiBinder<Widget, EditorWindow> { };
     private static MyUiBinder uiBinder = GWT.create(MyUiBinder.class);
 
@@ -72,6 +74,9 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     @UiField UserList users;
     @UiField TabLayoutPanel tabpanel;
     @UiField Image alertImage;
+    @UiField HTMLPanel effectiveField;
+    @UiField Label effectiveUser;
+    @UiField Label effectiveAccess;
 
     private EditSession editSession;
     private CachingUserRetrieval userRetrieval;
@@ -85,6 +90,12 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         users.setUserRetrieval(userRetrieval);
         groups.setDecorator(groupDecorator);
         directoryTree.setDecorator(directoryDecorator);
+
+        tabpanel.addSelectionHandler(new SelectionHandler<Integer>() {
+            public void onSelection(SelectionEvent<Integer> event) {
+                refreshButtonStates();
+            }
+        });
 
         setEditSession(editSession);
     }
@@ -139,6 +150,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         removeButton.setEnabled(permissions.selected() != null);
         editGroupButton.setEnabled(groups.selected() != null && userCanEditGroup(groups.selected()));
         deleteGroupButton.setEnabled(editGroupButton.isEnabled());
+        updateEffectivePermissionsField();
     }
 
     /**
@@ -157,6 +169,31 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         // Doesn't really have anything to do with that but
         // always seems to go hand-in-hand.
         refreshButtonStates();
+    }
+
+    private void updateEffectivePermissionsField() {
+        // Only if it makes sense
+        if (selectedTab() != Tab.Users || users.selected() == null) {
+            effectiveField.setVisible(false);
+            return;
+        }
+
+        effectiveField.setVisible(true);
+        User user     = users.selected();
+        Directory dir = currentDirectory();
+
+        Access effective = editSession.configuration().effectiveAccess(dir, user);
+        effectiveUser.setText(user.toString());
+        effectiveAccess.setText(accessToString(effective));
+    }
+
+    private String accessToString(Access access) {
+        switch (access) {
+            case Read: return "read";
+            case ReadWrite: return "read/write";
+            case Revoke: return "no";
+        }
+        return "?";
     }
 
     /**
