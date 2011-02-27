@@ -4,9 +4,11 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.HistoryListener;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.Window.ClosingEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
@@ -20,7 +22,6 @@ import nl.rix0r.subversive.subversion.EditSession;
 import nl.rix0r.subversive.subversion.Modification;
 
 /**
- *
  * @author rix0rrr
  */
 public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
@@ -33,6 +34,9 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     private String username;
     private String password;
     private static Label errorLabel = new Label("");
+    private String lastToken;
+
+    private EditorWindow currentEditor;
 
     public Subversive() {
         configEditor = GWT.create(ConfigEditorService.class);
@@ -55,12 +59,29 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
         History.addHistoryListener(this);
         retrieveBrandingImage();
         showLoginDialog();
+
+        Window.addWindowClosingHandler(new Window.ClosingHandler() {
+            public void onWindowClosing(ClosingEvent event) {
+                event.setMessage(closeWarning());
+            }
+        });
     }
 
     public static void display(Widget screen) {
         RootPanel.get("app").clear();
         RootPanel.get("app").add(errorLabel);
         RootPanel.get("app").add(screen);
+    }
+
+    private void setCurrentEditor(EditorWindow editor) {
+        this.currentEditor = editor;
+    }
+
+    private String closeWarning() {
+        if (currentEditor != null && currentEditor.hasUnsavedChanges())
+            return "You have unsaved changes.";
+
+        return null;
     }
 
     private void setTitle(String title) {
@@ -87,6 +108,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
             public void onSuccess(List<String> result) {
                 setTitle("My Repositories");
                 display(new RepositoryList(result));
+                setCurrentEditor(null);
             }
         });
     }
@@ -104,6 +126,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
 
                 setTitle(repository);
                 display(ew);
+                setCurrentEditor(ew);
 
                 // Start loading directories, forward to editor when retrieved
                 configEditor.listDirectories(repository, username, password, new AsyncCallback<List<Directory>>() {
@@ -149,6 +172,7 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     private void dispatchOnToken(String historyToken) {
         if (historyToken == null) historyToken = "";
         if (historyToken.startsWith("#")) historyToken = historyToken.substring(1);
+        lastToken = historyToken;
 
         if (historyToken.equals("")) {
             showRepositories();
@@ -159,6 +183,13 @@ public class Subversive implements EntryPoint, LoginHandler, HistoryListener {
     }
 
     public void onHistoryChanged(String historyToken) {
+        String warning = closeWarning();
+        if (warning != null && !warning.equals("")) {
+            if (!Window.confirm(warning + ". Press OK to leave the page, Cancel to stay.")) {
+                History.newItem(lastToken, false);
+                return;
+            }
+        }
         dispatchOnToken(historyToken);
     }
 
