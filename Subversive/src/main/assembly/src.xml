@@ -14,6 +14,7 @@
         <include>LICENSE*</include>
         <include>NOTICE*</include>
         <include>INSTALL*</include>
+        <include>CHANGE*</include>
         <include>COMPILING*</include>
         <include>*.dist</include>
         <include>pom.xml</include>
