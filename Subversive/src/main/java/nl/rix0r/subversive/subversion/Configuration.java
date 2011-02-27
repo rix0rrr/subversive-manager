@@ -135,4 +135,29 @@ public class Configuration implements Serializable {
 
         return !(principal instanceof Group) || (group((Group)principal) != null);
     }
+
+    /**
+     * Returns the effective access rights of a user in a given directory
+     *
+     * Run through all directories from most specific to least specific,
+     * returning the rights as soon as a permission matches the user or
+     * one of the groups he is a member of.
+     */
+    public Access effectiveAccess(Directory directory, User user) {
+        for (Permission perm: permissions(directory, null))
+            if (permAppliesTo(perm, user))
+                return perm.access();
+
+        if (directory.root())
+            return Access.Revoke;
+        else
+            return effectiveAccess(directory.parent(), user);
+    }
+
+    public boolean permAppliesTo(Permission perm, User user) {
+        if (perm.principal().equals(user)) return true;
+        if (perm.principal().equals(new Anonymous())) return true;
+        if (perm.principal() instanceof Group) return group((Group)perm.principal()).contains(user);
+        return false;
+    }
 }
