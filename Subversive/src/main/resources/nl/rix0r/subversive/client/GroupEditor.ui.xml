@@ -34,7 +34,7 @@
             </table>
 
             <div class="buttons">
-                <g:Button ui:field="saveButton" addStyleNames="right">Save</g:Button>
+                <g:Button ui:field="saveButton" addStyleNames="right">Confirm</g:Button>
                 <g:Button ui:field="cancelButton" addStyleNames="left">Cancel</g:Button>
             </div>
         </div>

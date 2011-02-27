@@ -10,7 +10,6 @@ import com.google.gwt.event.logical.shared.OpenEvent;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -77,6 +76,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
     private EditSession editSession;
     private CachingUserRetrieval userRetrieval;
     private GroupEditor currentGroupEditor;
+    private boolean movedAway = false;
 
     public EditorWindow(EditSession editSession, CachingUserRetrieval userRetrieval) {
         initWidget(uiBinder.createAndBindUi(this));
@@ -131,6 +131,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         if (editSession == null) return;
 
         undoButton.setEnabled(editSession.canUndo());
+        saveButton.setEnabled(editSession.canUndo());
         assignButton.setEnabled(
                 (selectedTab() == Tab.Users && users.selected() != null && !permissions.containsPrincipal(users.selected()))
                 || (groups.selected() != null && !permissions.containsPrincipal(groups.selected())));
@@ -207,8 +208,13 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
         return directoryTree.selected();
     }
 
+    public boolean hasUnsavedChanges() {
+        return !movedAway && editSession.canUndo();
+    }
+
     @UiHandler("saveButton")
     void saveButtonClicked(ClickEvent e) {
+        movedAway = true;
         editingDone();
     }
 
@@ -220,6 +226,7 @@ public class EditorWindow extends Composite implements HasCloseHandlers<EditSess
 
     @UiHandler("backButton")
     void cancelClick(ClickEvent e) {
+        movedAway = true;
         Window.Location.replace("#"); // Go back to the overview without leaving a history token
     }
 
