@@ -1,0 +1,24 @@
+0.1.3 (2010-02-27)
+------------------
+- NEW: Added warning to avoid losing unsaved changes.
+- NEW: Added a preview showing effective user permissions.
+- CHG: Double-click on a group now edits, also in the permissions
+  list.
+- FIX: LDAP user lookup now compatible with Novell NetWare.
+- FIX: Properly recognize empty groups.
+- FIX: Small appearance fixes.
+- FIX: User retrieval more reliable.
+- FIX: Fixed a bug where users couldn't be added.
+
+
+0.1.2 (2010-02-10)
+------------------
+- NEW: Show a prompting message in an empty user list.
+- NEW: Added project page links to encourage bug reporting.
+- CHG: User and group lists are now properly sorted (local groups
+  first).
+- CHG: Group definitions are written out to config file in sorted
+  order.
+- FIX: Fixed bugs with regards to handling repository names with
+  dashes in them. (Separator character is now a period)
+
