@@ -5,6 +5,10 @@ body {
     padding: 0;
 }
 
+table td {
+    vertical-align: top;
+}
+
 #header {
     position: relative; /* Need this to have the logo's clip to this div's height */
     height: 80px;

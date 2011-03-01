@@ -94,6 +94,7 @@
           <runTarget>index.html</runTarget>
           <hostedWebapp>${webappDirectory}</hostedWebapp>
           <i18nMessagesBundle>nl.rix0r.subversive.client.Messages</i18nMessagesBundle>
+          <bindAddress>0.0.0.0</bindAddress>
         </configuration>
       </plugin>
 
